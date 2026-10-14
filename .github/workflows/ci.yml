@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php: ['7.4', '8.0', '8.1', '8.2', '8.3', '8.4']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: gd, mbstring, xml
+      - run: find . -name '*.php' -not -path './node_modules/*' -print0 | xargs -0 -n1 php -l > /dev/null
+
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: gd, mbstring, xml, exif
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: php tests/test-image.php
+      - run: npm ci
+      - run: npm test
+
+  integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: gd, mbstring, xml, exif, zip, curl, intl, sqlite3, pdo_sqlite
+      - run: bin/setup-test-env.sh "$RUNNER_TEMP/kikz-env"
+      - run: KIKZ_WP_LOAD="$RUNNER_TEMP/kikz-env/wp/wp-load.php" php tests/integration/run.php
+      - run: KIKZ_WP_DIR="$RUNNER_TEMP/kikz-env/wp" tests/integration/e2e.sh

@@ -1,0 +1,71 @@
+.kikz-chip{display:inline-flex;align-items:center;gap:4px;padding:1px 10px;border-radius:999px;border:1px solid #c3c4c7;background:#f6f7f7;color:#50575e;font-size:11px;line-height:1.8;cursor:pointer;transition:background .15s ease,color .15s ease,border-color .15s ease}
+.kikz-chip:hover{border-color:var(--wp-admin-theme-color,#2271b1);color:var(--wp-admin-theme-color,#2271b1)}
+.kikz-chip.is-on{background:var(--wp-admin-theme-color,#2271b1);border-color:var(--wp-admin-theme-color,#2271b1);color:#fff}
+.kikz-chip[disabled]{opacity:.5;cursor:wait}
+.attachment{position:relative}
+.kikz-grid-badge{position:absolute;top:8px;left:8px;z-index:3;background:rgba(0,0,0,.7);color:#fff;border-radius:999px;padding:1px 8px;font-size:11px;line-height:1.7;pointer-events:none}
+.kikz-wrap{max-width:1180px}
+.kikz-header{display:flex;align-items:center;gap:14px;margin:16px 0 22px}
+.kikz-logo{width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,var(--wp-admin-theme-color,#2271b1),#0a4b78);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;letter-spacing:.5px;box-shadow:0 6px 14px -6px rgba(0,0,0,.45)}
+.kikz-header h1{margin:0;font-size:23px;line-height:1.2;font-weight:600}
+.kikz-header p{margin:3px 0 0;color:#646970;font-size:13px}
+.kikz-version{display:inline-block;vertical-align:middle;margin-left:8px;padding:2px 9px;border-radius:999px;background:#f0f0f1;color:#646970;font-size:11px;font-weight:500;letter-spacing:.02em}
+.kikz-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:22px;align-items:start}
+@media(max-width:960px){.kikz-grid{grid-template-columns:1fr}}
+.kikz-card{background:#fff;border:1px solid #dcdcde;border-radius:16px;padding:22px 24px;box-shadow:0 1px 2px rgba(0,0,0,.04),0 14px 30px -24px rgba(0,0,0,.35)}
+.kikz-card + .kikz-card{margin-top:22px}
+.kikz-card h2{margin:0 0 4px;font-size:15px;font-weight:600}
+.kikz-card .kikz-hint{margin:0 0 18px;color:#646970;font-size:12.5px;line-height:1.5}
+.kikz-field{margin:0 0 18px}
+.kikz-field:last-child{margin-bottom:0}
+.kikz-field > label{display:block;font-weight:600;margin-bottom:6px}
+.kikz-input{width:100%;max-width:440px;border-radius:10px;border:1px solid #c3c4c7;padding:8px 12px;font-size:13px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+.kikz-input:focus{border-color:var(--wp-admin-theme-color,#2271b1);box-shadow:0 0 0 2px rgba(34,113,177,.22);outline:none}
+textarea.kikz-input{min-height:74px;resize:vertical}
+.kikz-wrap label.kikz-switch{display:inline-flex;align-items:center;gap:10px;cursor:pointer;user-select:none}
+.kikz-switch input{position:absolute;opacity:0;pointer-events:none}
+.kikz-wrap .kikz-switch .kikz-track{display:inline-block;vertical-align:middle;width:44px;height:25px;border-radius:999px;background:#c3c4c7;position:relative;transition:background .15s ease;flex:0 0 auto}
+.kikz-switch .kikz-track::after{content:"";position:absolute;top:3px;left:3px;width:19px;height:19px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.25);transition:transform .15s ease}
+.kikz-switch input:checked + .kikz-track{background:var(--wp-admin-theme-color,#2271b1)}
+.kikz-switch input:checked + .kikz-track::after{transform:translateX(19px)}
+.kikz-switch input:focus-visible + .kikz-track{box-shadow:0 0 0 2px rgba(34,113,177,.35)}
+.kikz-preview{position:relative;border-radius:14px;overflow:hidden;min-height:220px;background:linear-gradient(135deg,#e8edf3,#ccd6e2);display:flex;align-items:center;justify-content:center;color:#8794a5;font-size:12px;letter-spacing:.04em;text-transform:uppercase}
+.kikz-preview .kikz-badge-demo{text-transform:none;z-index:2;position:absolute;background:var(--kikz-demo-bg,rgba(0,0,0,.65));color:var(--kikz-demo-fg,#fff);border-radius:999px;padding:3px 11px;font-size:12px;line-height:1.7;font-weight:600;white-space:nowrap}
+.kikz-preview .kikz-notice-demo{text-transform:none;position:absolute;left:0;right:0;bottom:0;background:rgba(255,255,255,.9);text-align:center;font-size:11.5px;color:#646970;padding:8px 12px;display:none}
+.kikz-preview.show-notice .kikz-notice-demo{display:block}
+
+.kikz-preview .kikz-badge-demo{font-family:'Kikz Badge','DejaVu Sans',sans-serif;}
+.kikz-preview img{display:block;width:100%;height:auto;max-height:440px;object-fit:contain;border-radius:12px;}
+.kikz-preview.has-image{min-height:0;}
+.kikz-stat{display:grid;grid-template-columns:repeat(4,1fr);align-items:center;gap:14px;padding:14px 16px;border-radius:12px;background:#f6f7f7;border:1px solid #f0f0f1}
+.kikz-stat strong{font-size:24px;line-height:1;display:block}
+.kikz-stat span{color:#646970;font-size:12px}
+.kikz-actions{margin:22px 0 8px;display:flex;gap:12px;align-items:center}
+.kikz-actions .button-primary{border-radius:10px;padding:4px 18px;height:auto;line-height:2.2}
+.kikz-code{background:#f0f0f1;border-radius:6px;padding:1px 7px;font-size:12px}
+.kikz-footer-note{margin-top:24px;color:#646970;font-size:12px}
+.kikz-sub{display:block;font-size:11.5px;color:#646970;margin:0 0 4px;font-weight:500}
+.kikz-chip.is-pending{opacity:.75;border-style:dashed}
+.kikz-chip.is-warn{background:#dba617;border-color:#dba617;color:#1d2327}
+.kikz-stat div{min-width:0}
+.kikz-stat span{display:block;margin-top:4px;line-height:1.3}
+.kikz-grid-badge.is-warn{background:#b32d2e}
+.kikz-list{margin:6px 0 0;padding:0;list-style:none;max-height:260px;overflow:auto;border:1px solid #f0f0f1;border-radius:10px}
+.kikz-list li{display:flex;align-items:center;gap:8px;margin:0;padding:6px 10px;border-bottom:1px solid #f0f0f1;font-size:12.5px}
+.kikz-list li:last-child{border-bottom:0}
+.kikz-list .kikz-file{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.kikz-list .kikz-meta{color:#646970;font-size:11.5px}
+.kikz-issues{margin:6px 0 0;padding-left:18px;list-style:disc;font-size:12.5px}
+.kikz-ok{color:#007017}.kikz-bad{color:#b32d2e}
+.kikz-progress{height:6px;border-radius:999px;background:#f0f0f1;overflow:hidden;margin-top:8px}
+.kikz-progress > i{display:block;height:100%;width:0;background:var(--wp-admin-theme-color,#2271b1);transition:width .2s ease}
+.kikz-preview .kikz-badge-demo.pos-top-left{top:12px;left:12px}
+.kikz-preview .kikz-badge-demo.pos-top-center{top:12px;left:50%;transform:translateX(-50%)}
+.kikz-preview .kikz-badge-demo.pos-top-right{top:12px;right:12px}
+.kikz-preview .kikz-badge-demo.pos-middle-left{top:50%;left:12px;transform:translateY(-50%)}
+.kikz-preview .kikz-badge-demo.pos-center{top:50%;left:50%;transform:translate(-50%,-50%)}
+.kikz-preview .kikz-badge-demo.pos-middle-right{top:50%;right:12px;transform:translateY(-50%)}
+.kikz-preview .kikz-badge-demo.pos-bottom-left{bottom:12px;left:12px}
+.kikz-preview .kikz-badge-demo.pos-bottom-center{bottom:12px;left:50%;transform:translateX(-50%)}
+.kikz-preview .kikz-badge-demo.pos-bottom-right{bottom:12px;right:12px}
+.kikz-preview.show-notice .kikz-badge-demo.pos-bottom-left,.kikz-preview.show-notice .kikz-badge-demo.pos-bottom-center,.kikz-preview.show-notice .kikz-badge-demo.pos-bottom-right{bottom:48px}

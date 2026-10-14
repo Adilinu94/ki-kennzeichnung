@@ -1,0 +1,12 @@
+{
+  "name": "ki-kennzeichnung-dev",
+  "private": true,
+  "description": "Dev-only tooling for the KI-Kennzeichnung WordPress plugin (tests). Not shipped.",
+  "scripts": {
+    "test": "node tests/geometry.test.js && node tests/dom.test.js"
+  },
+  "devDependencies": {
+    "css-tree": "^3.0.0",
+    "jsdom": "^26.0.0"
+  }
+}

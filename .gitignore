@@ -1,14 +1,4 @@
-# Referenz-Plugin (nicht Teil dieses Projekts)
-Refernz/
-
-# IDE
-.idea/
-.vscode/
-*.iml
-
-# OS
+node_modules/
+*.kikz-tmp
 .DS_Store
-Thumbs.db
-
-# Logs
-*.log
+/dist/

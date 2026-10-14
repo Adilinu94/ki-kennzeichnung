@@ -1,0 +1,659 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the KI-Kennzeichnung package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: KI-Kennzeichnung 2.0.0\n"
+"Report-Msgid-Bugs-To: https://github.com/Adilinu94/ki-kennzeichnung/issues\n"
+"POT-Creation-Date: 2026-10-14 07:15+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: includes/class-kikz-audit.php:70 includes/class-kikz-detect.php:249
+#: includes/class-kikz-media.php:44 includes/class-kikz-media.php:365
+msgid "Keine Berechtigung."
+msgstr ""
+
+#: includes/class-kikz-audit.php:78
+msgid "Die Prüfung ist abgelaufen, bitte neu starten."
+msgstr ""
+
+#. translators: %s: image file name
+#: includes/class-kikz-audit.php:150
+#, php-format
+msgid "Bild ohne Kennzeichnung ausgeliefert: %s"
+msgstr ""
+
+#. translators: 1: element type, 2: Elementor element ID
+#: includes/class-kikz-audit.php:192
+#, php-format
+msgid "Hintergrundbild ohne Kennzeichnung: %1$s %2$s"
+msgstr ""
+
+#: includes/class-kikz-elementor.php:49 includes/class-kikz-media.php:64
+#: includes/class-kikz-media.php:211
+msgid "KI-Kennzeichnung"
+msgstr ""
+
+#: includes/class-kikz-elementor.php:56
+msgid "Kennzeichnung"
+msgstr ""
+
+#: includes/class-kikz-elementor.php:60
+msgid "Automatisch (markierte Bilder erkennen)"
+msgstr ""
+
+#: includes/class-kikz-elementor.php:61
+msgid "Immer kennzeichnen"
+msgstr ""
+
+#: includes/class-kikz-elementor.php:62
+msgid "Nie kennzeichnen"
+msgstr ""
+
+#: includes/class-kikz-elementor.php:64
+msgid ""
+"Automatisch: Ist das Hintergrund- oder Widget-Bild in der Mediathek als KI-"
+"generiert markiert, wird das Badge am Element angezeigt."
+msgstr ""
+
+#: includes/class-kikz-media.php:66
+msgid "KI-generiertes Bild"
+msgstr ""
+
+#: includes/class-kikz-media.php:67
+msgid ""
+"Das Bild wird auf der Website gekennzeichnet (Badge, Alt-Text-Zusatz, "
+"Metadaten)."
+msgstr ""
+
+#: includes/class-kikz-media.php:100
+msgid "KI-Kennzeichnung umschalten"
+msgstr ""
+
+#: includes/class-kikz-media.php:105
+msgid "Wird im Hintergrund eingebrannt"
+msgstr ""
+
+#: includes/class-kikz-media.php:111
+msgid "Badge ist in die Datei eingebrannt"
+msgstr ""
+
+#: includes/class-kikz-media.php:135
+msgid "Als KI-generiert markieren"
+msgstr ""
+
+#: includes/class-kikz-media.php:136
+msgid "KI-Kennzeichnung entfernen"
+msgstr ""
+
+#. translators: %d: number of images
+#: includes/class-kikz-media.php:178
+#, php-format
+msgid "%d Bild als KI-generiert markiert."
+msgid_plural "%d Bilder als KI-generiert markiert."
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %d: number of images
+#: includes/class-kikz-media.php:180
+#, php-format
+msgid "Bei %d Bild wurde die KI-Kennzeichnung entfernt."
+msgid_plural "Bei %d Bildern wurde die KI-Kennzeichnung entfernt."
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %d: number of queued images
+#: includes/class-kikz-media.php:184
+#, php-format
+msgid "%d Bild wird im Hintergrund bearbeitet."
+msgid_plural "%d Bilder werden im Hintergrund bearbeitet."
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %d: number of skipped images
+#: includes/class-kikz-media.php:189
+#, php-format
+msgid "%d übersprungen (keine Berechtigung oder kein Bild)."
+msgstr ""
+
+#: includes/class-kikz-media.php:214
+msgid "KI-Kennzeichnung: alle"
+msgstr ""
+
+#: includes/class-kikz-media.php:215
+msgid "Nur KI-markierte"
+msgstr ""
+
+#: includes/class-kikz-media.php:216
+msgid "Nur nicht markierte"
+msgstr ""
+
+#: includes/class-kikz-media.php:217
+msgid "Nur mit Stempel-Problem"
+msgstr ""
+
+#: includes/class-kikz-media.php:265
+msgid "Wird verarbeitet …"
+msgstr ""
+
+#: includes/class-kikz-media.php:266
+#, php-format
+msgid "Bilder in der Warteschlange: %d"
+msgstr ""
+
+#: includes/class-kikz-media.php:267
+msgid "Warteschlange abgearbeitet."
+msgstr ""
+
+#: includes/class-kikz-media.php:268
+msgid "Probleme bei einzelnen Bildern:"
+msgstr ""
+
+#: includes/class-kikz-media.php:269
+msgid ""
+"Die Datei wurde nach dem Stempeln bearbeitet. Trotzdem das Original "
+"wiederherstellen? Deine Bearbeitung geht dabei verloren."
+msgstr ""
+
+#: includes/class-kikz-media.php:270
+#, php-format
+msgid "%1$d Treffer, davon %2$d noch nicht markiert."
+msgstr ""
+
+#: includes/class-kikz-media.php:271
+msgid ""
+"Die gewählten Bilder als KI-generiert markieren? Das Badge wird in die "
+"Dateien eingebrannt (Originale werden gesichert)."
+msgstr ""
+
+#: includes/class-kikz-media.php:272
+#, php-format
+msgid "%d Bilder markiert, Stempeln läuft im Hintergrund."
+msgstr ""
+
+#: includes/class-kikz-media.php:273
+msgid "Dateinamen sind nur ein Hinweis – bitte prüfe die Treffer."
+msgstr ""
+
+#: includes/class-kikz-media.php:274
+#, php-format
+msgid "Alle %d offenen Treffer markieren (nicht nur die angezeigten)"
+msgstr ""
+
+#: includes/class-kikz-media.php:275
+#, php-format
+msgid "Prüfe Metadaten … %d Bilder geprüft"
+msgstr ""
+
+#: includes/class-kikz-media.php:276
+#, php-format
+msgid "Fertig: %1$d Bilder automatisch markiert, %2$d Kandidaten zur Prüfung."
+msgstr ""
+
+#: includes/class-kikz-media.php:277
+msgid "Markieren"
+msgstr ""
+
+#: includes/class-kikz-media.php:278
+msgid ""
+"Alle eingebrannten Bilder mit den aktuellen Einstellungen neu stempeln? Das "
+"läuft im Hintergrund."
+msgstr ""
+
+#: includes/class-kikz-media.php:279
+msgid ""
+"Alle eingebrannten Badges entfernen und die Originale wiederherstellen? Die "
+"Bilder bleiben markiert (Overlay)."
+msgstr ""
+
+#: includes/class-kikz-media.php:280
+#, php-format
+msgid "%d Bilder zur Bearbeitung eingeplant."
+msgstr ""
+
+#: includes/class-kikz-media.php:281
+#, php-format
+msgid "Seitenprüfung: %1$d von %2$d Seiten …"
+msgstr ""
+
+#: includes/class-kikz-media.php:282
+#, php-format
+msgid ""
+"Alles in Ordnung: %d Seiten geprüft, jedes markierte Bild ist gekennzeichnet."
+msgstr ""
+
+#: includes/class-kikz-media.php:283
+#, php-format
+msgid "Gefunden: %1$d Probleme auf %2$d Seiten."
+msgstr ""
+
+#: includes/class-kikz-media.php:284
+msgid "Elementor-Cache geleert."
+msgstr ""
+
+#: includes/class-kikz-media.php:285
+msgid "Anfrage fehlgeschlagen."
+msgstr ""
+
+#: includes/class-kikz-media.php:286 includes/class-kikz-settings.php:505
+msgid "Bild auswählen"
+msgstr ""
+
+#: includes/class-kikz-media.php:287
+msgid "Bild ändern"
+msgstr ""
+
+#: includes/class-kikz-media.php:288
+#, php-format
+msgid ""
+"%d Bilder wurden mit einer älteren Version gestempelt. „Alle neu stempeln“ "
+"aktualisiert sie (lesbare Thumbnails, Metadaten)."
+msgstr ""
+
+#: includes/class-kikz-media.php:303
+msgid "Ungültige ID oder keine Berechtigung."
+msgstr ""
+
+#: includes/class-kikz-settings.php:314
+msgid "Einstellungen"
+msgstr ""
+
+#: includes/class-kikz-settings.php:353
+msgid "Oben links"
+msgstr ""
+
+#: includes/class-kikz-settings.php:354
+msgid "Oben Mitte"
+msgstr ""
+
+#: includes/class-kikz-settings.php:355
+msgid "Oben rechts"
+msgstr ""
+
+#: includes/class-kikz-settings.php:356
+msgid "Mitte links"
+msgstr ""
+
+#: includes/class-kikz-settings.php:357
+msgid "Zentriert"
+msgstr ""
+
+#: includes/class-kikz-settings.php:358
+msgid "Mitte rechts"
+msgstr ""
+
+#: includes/class-kikz-settings.php:359
+msgid "Unten links"
+msgstr ""
+
+#: includes/class-kikz-settings.php:360
+msgid "Unten Mitte"
+msgstr ""
+
+#: includes/class-kikz-settings.php:361
+msgid "Unten rechts"
+msgstr ""
+
+#: includes/class-kikz-settings.php:370
+msgid ""
+"KI-Bilder zuverlässig kennzeichnen: Badge am Bild, Alt-Text-Zusatz, "
+"maschinenlesbare Metadaten und Hinweis auf der Website."
+msgstr ""
+
+#: includes/class-kikz-settings.php:376
+msgid ""
+"Die frühere Google-Fonts-URL wird nicht mehr geladen (Datenschutz: "
+"Übertragung der IP-Adresse an Google). Trage stattdessen unter "
+"„Schriftfamilie“ eine lokal eingebundene oder System-Schrift ein."
+msgstr ""
+
+#: includes/class-kikz-settings.php:384
+msgid "Darstellung"
+msgstr ""
+
+#: includes/class-kikz-settings.php:385
+msgid "Diese Texte und Einstellungen gelten für Badge und Alt-Text."
+msgstr ""
+
+#: includes/class-kikz-settings.php:388
+msgid "Badge-Text"
+msgstr ""
+
+#: includes/class-kikz-settings.php:392
+msgid "Nur Kurzform „KI“ anzeigen"
+msgstr ""
+
+#: includes/class-kikz-settings.php:395
+msgid "Alt-Text-Zusatz"
+msgstr ""
+
+#: includes/class-kikz-settings.php:397
+msgid ""
+"Wird in Klammern an vorhandene Alt-Texte angehängt. Dekorative Bilder "
+"(leerer Alt-Text) bleiben unverändert."
+msgstr ""
+
+#: includes/class-kikz-settings.php:401
+msgid "Kennzeichnungs-Modus"
+msgstr ""
+
+#: includes/class-kikz-settings.php:406
+msgid ""
+"Automatisch (empfohlen): Badge in die Datei + Overlay, wo das Badge "
+"abgeschnitten oder zu klein wäre"
+msgstr ""
+
+#: includes/class-kikz-settings.php:407
+msgid ""
+"Nur in die Datei einbrennen (Overlay nur als Ersatz, wenn das Einbrennen "
+"nicht möglich ist)"
+msgstr ""
+
+#: includes/class-kikz-settings.php:408
+msgid "Nur Overlay über dem Bild (Datei bleibt unverändert)"
+msgstr ""
+
+#: includes/class-kikz-settings.php:413
+msgid ""
+"Ein eingebranntes Badge überlebt Download, Teilen und Lightbox, kann aber "
+"durch Zuschnitt (Object-Fit „Cover“, Hintergrundbilder) verschwinden. Im "
+"automatischen Modus prüft ein kleines Skript das und blendet das Overlay nur "
+"dann ein, wenn es nötig ist."
+msgstr ""
+
+#: includes/class-kikz-settings.php:417
+msgid "Badge-Stil"
+msgstr ""
+
+#: includes/class-kikz-settings.php:419
+msgid "Größe"
+msgstr ""
+
+#: includes/class-kikz-settings.php:420
+msgid "Klein"
+msgstr ""
+
+#: includes/class-kikz-settings.php:420
+msgid "Mittel"
+msgstr ""
+
+#: includes/class-kikz-settings.php:420
+msgid "Groß"
+msgstr ""
+
+#: includes/class-kikz-settings.php:422
+msgid "Position"
+msgstr ""
+
+#: includes/class-kikz-settings.php:425
+msgid "Stil"
+msgstr ""
+
+#: includes/class-kikz-settings.php:426
+msgid "Dunkel"
+msgstr ""
+
+#: includes/class-kikz-settings.php:426
+msgid "Hell"
+msgstr ""
+
+#: includes/class-kikz-settings.php:428
+msgid "Randabstand (px)"
+msgstr ""
+
+#: includes/class-kikz-settings.php:436
+msgid "Farben & Schrift"
+msgstr ""
+
+#: includes/class-kikz-settings.php:437
+msgid ""
+"Leer lassen, um die Farben des gewählten Stils zu verwenden. Erlaubt: Hex "
+"(#rrggbb, #rrggbbaa) oder rgb()/rgba()."
+msgstr ""
+
+#: includes/class-kikz-settings.php:439
+msgid "Schriftfarbe"
+msgstr ""
+
+#: includes/class-kikz-settings.php:443
+msgid "Hintergrund"
+msgstr ""
+
+#: includes/class-kikz-settings.php:447
+msgid "Schriftfamilie (nur Overlay)"
+msgstr ""
+
+#: includes/class-kikz-settings.php:449
+msgid ""
+"Beispiel: Inter, system-ui, sans-serif. Es werden keine Schriften von "
+"Drittanbietern nachgeladen; nutze eine Schrift, die dein Theme bereits lokal "
+"ausliefert. Das eingebrannte Badge verwendet die mitgelieferte DejaVu Sans."
+msgstr ""
+
+#: includes/class-kikz-settings.php:454
+msgid "Footer-Hinweis"
+msgstr ""
+
+#: includes/class-kikz-settings.php:455
+msgid "Ergänzend zur Kennzeichnung am Bild, abschaltbar."
+msgstr ""
+
+#: includes/class-kikz-settings.php:456
+msgid "Hinweis automatisch im Footer anzeigen"
+msgstr ""
+
+#: includes/class-kikz-settings.php:458
+msgid "Hinweis-Text"
+msgstr ""
+
+#: includes/class-kikz-settings.php:464
+msgid "Elementor, Hintergrundbilder & Shortcodes"
+msgstr ""
+
+#: includes/class-kikz-settings.php:466
+msgid ""
+"Elementor-Container, Flexbox-Container, Sections und Bild-Widgets werden "
+"automatisch erkannt: Das Plugin liest die Bild-ID aus den Elementor-"
+"Einstellungen (inkl. Tablet/Mobil, Hover, Overlay, Slideshow und dynamischem "
+"Beitragsbild). Unter „Erweitert → KI-Kennzeichnung“ kannst du pro Element "
+"„Immer“ oder „Nie“ erzwingen. Für andere Stellen: Shortcode [ki-badge] oder "
+"CSS-Klasse ki-badge-anzeigen."
+msgstr ""
+
+#: includes/class-kikz-settings.php:471
+msgid "Erkennung"
+msgstr ""
+
+#: includes/class-kikz-settings.php:472
+msgid ""
+"Metadaten (C2PA, IPTC DigitalSourceType, KI-Software, Prompt-Felder) sind "
+"das verlässlichste Signal. Dateinamen sind nur ein Hinweis und werden nie "
+"ohne Bestätigung markiert."
+msgstr ""
+
+#: includes/class-kikz-settings.php:473
+msgid ""
+"Beim Upload automatisch per Metadaten erkennen (ab „sehr wahrscheinlich“)"
+msgstr ""
+
+#: includes/class-kikz-settings.php:475
+msgid "Mediathek per Metadaten prüfen"
+msgstr ""
+
+#: includes/class-kikz-settings.php:480
+msgid "Dateinamen-Muster (Komma-getrennt, ganze Wörter)"
+msgstr ""
+
+#: includes/class-kikz-settings.php:484
+msgid "Nach Dateinamen suchen"
+msgstr ""
+
+#: includes/class-kikz-settings.php:485
+msgid "Ausgewählte markieren"
+msgstr ""
+
+#: includes/class-kikz-settings.php:491
+msgid "Cache"
+msgstr ""
+
+#: includes/class-kikz-settings.php:492
+msgid ""
+"Nach dem Einbrennen bleibt die Bild-URL gleich. Bereits besuchte Seiten "
+"können das alte Bild im Browser-Cache haben. Deshalb bleibt das Overlay nach "
+"dem Stempeln noch einige Tage aktiv."
+msgstr ""
+
+#: includes/class-kikz-settings.php:494
+msgid "Overlay nach dem Einbrennen beibehalten (Tage, 0 = aus)"
+msgstr ""
+
+#: includes/class-kikz-settings.php:502
+msgid "Live-Vorschau"
+msgstr ""
+
+#: includes/class-kikz-settings.php:503
+msgid ""
+"Wähle ein Bild aus der Mediathek, um die Kennzeichnung darauf live zu sehen."
+msgstr ""
+
+#: includes/class-kikz-settings.php:506
+msgid "Entfernen"
+msgstr ""
+
+#: includes/class-kikz-settings.php:514
+msgid "Bildbereich"
+msgstr ""
+
+#: includes/class-kikz-settings.php:523
+msgid "Status"
+msgstr ""
+
+#: includes/class-kikz-settings.php:525
+msgid "markierte Bilder"
+msgstr ""
+
+#: includes/class-kikz-settings.php:526
+msgid "eingebrannt"
+msgstr ""
+
+#: includes/class-kikz-settings.php:527
+msgid "in Warteschlange"
+msgstr ""
+
+#: includes/class-kikz-settings.php:528
+msgid "nur Overlay"
+msgstr ""
+
+#: includes/class-kikz-settings.php:532
+msgid "In der Mediathek"
+msgstr ""
+
+#: includes/class-kikz-settings.php:533
+msgid "Warteschlange verarbeiten"
+msgstr ""
+
+#: includes/class-kikz-settings.php:534
+msgid "Alle neu stempeln"
+msgstr ""
+
+#: includes/class-kikz-settings.php:536
+msgid "Eingebrannte Badges entfernen"
+msgstr ""
+
+#: includes/class-kikz-settings.php:539
+msgid ""
+"„Alle neu stempeln“ wendet geänderte Badge-Einstellungen an und stempelt "
+"markierte Bilder, die noch keine eingebrannte Kennzeichnung haben (aus den "
+"gesicherten Originalen, ohne Qualitätsverlust). Im Modus „Overlay“ bleiben "
+"bereits eingebrannte Badges bestehen, bis du sie hier entfernst."
+msgstr ""
+
+#: includes/class-kikz-settings.php:543
+msgid "Prüfung & Nachweis"
+msgstr ""
+
+#: includes/class-kikz-settings.php:544
+msgid ""
+"Die Seitenprüfung ruft deine Seiten ab und kontrolliert, ob jedes markierte "
+"Bild und jeder Elementor-Hintergrund tatsächlich gekennzeichnet ausgeliefert "
+"wird."
+msgstr ""
+
+#: includes/class-kikz-settings.php:546
+msgid "Seitenprüfung starten"
+msgstr ""
+
+#: includes/class-kikz-settings.php:547
+msgid "Nachweis als CSV"
+msgstr ""
+
+#: includes/class-kikz-settings.php:549
+msgid "Elementor-Cache leeren"
+msgstr ""
+
+#: includes/class-kikz-settings.php:557
+msgid "Änderungen speichern"
+msgstr ""
+
+#: includes/class-kikz-stamper.php:166
+msgid "Datei nicht gefunden."
+msgstr ""
+
+#: includes/class-kikz-stamper.php:167
+msgid ""
+"Dateityp wird nicht eingebrannt (z. B. GIF, SVG) – das Overlay übernimmt."
+msgstr ""
+
+#: includes/class-kikz-stamper.php:168
+msgid "Bild konnte nicht gelesen werden."
+msgstr ""
+
+#: includes/class-kikz-stamper.php:169
+msgid "Bild ist für ein Badge zu klein – das Overlay übernimmt."
+msgstr ""
+
+#: includes/class-kikz-stamper.php:170
+msgid "Zu wenig Arbeitsspeicher für dieses Bild (PHP memory_limit)."
+msgstr ""
+
+#: includes/class-kikz-stamper.php:171
+msgid "Bild konnte nicht dekodiert werden."
+msgstr ""
+
+#: includes/class-kikz-stamper.php:172
+msgid "Bild konnte nicht gespeichert werden."
+msgstr ""
+
+#: includes/class-kikz-stamper.php:173
+msgid "Datei ist nicht beschreibbar."
+msgstr ""
+
+#: includes/class-kikz-stamper.php:174
+msgid "Original konnte nicht gesichert werden."
+msgstr ""
+
+#: includes/class-kikz-stamper.php:175
+msgid "Gesichertes Original fehlt."
+msgstr ""
+
+#: includes/class-kikz-stamper.php:176
+msgid "Bildgrößen konnten nicht erzeugt werden."
+msgstr ""
+
+#: includes/class-kikz-stamper.php:177
+msgid "Die Datei wurde nach dem Stempeln bearbeitet."
+msgstr ""
+
+#: includes/class-kikz-stamper.php:178
+msgid "Auf diesem Server fehlt die PHP-Erweiterung GD."
+msgstr ""
