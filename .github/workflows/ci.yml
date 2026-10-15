@@ -41,6 +41,25 @@ jobs:
         with:
           php-version: '8.3'
           extensions: gd, mbstring, xml, exif, zip, curl, intl, sqlite3, pdo_sqlite
+      - name: Environment
+        run: |
+          echo "::notice title=PHP::$(php -v | head -1)"
+          echo "::notice title=GD::$(php -r 'echo json_encode(array_intersect_key(gd_info(), array_flip(["GD Version","FreeType Support","WebP Support","AVIF Support","JPEG Support","PNG Support"])));')"
+          echo "::notice title=Imagick::$(php -r 'echo class_exists("Imagick") ? "yes" : "no";')"
       - run: bin/setup-test-env.sh "$RUNNER_TEMP/kikz-env"
-      - run: KIKZ_WP_LOAD="$RUNNER_TEMP/kikz-env/wp/wp-load.php" php tests/integration/run.php
-      - run: KIKZ_WP_DIR="$RUNNER_TEMP/kikz-env/wp" tests/integration/e2e.sh
+      - name: Integration tests
+        run: |
+          set +e
+          KIKZ_WP_LOAD="$RUNNER_TEMP/kikz-env/wp/wp-load.php" php tests/integration/run.php 2>&1 | tee "$RUNNER_TEMP/integration.log"
+          code=${PIPESTATUS[0]}
+          # Surface failures as annotations (visible in the PR and via the API).
+          grep -E "FAIL|Fatal|Parse error|Uncaught" "$RUNNER_TEMP/integration.log" | head -9 | while IFS= read -r line; do echo "::error title=integration::${line}"; done
+          grep -i "ki-kennzeichnung" "$RUNNER_TEMP/kikz-env/wp/wp-content/debug.log" 2>/dev/null | head -3 | while IFS= read -r line; do echo "::warning title=plugin log::${line}"; done
+          exit $code
+      - name: End-to-end tests
+        run: |
+          set +e
+          KIKZ_WP_DIR="$RUNNER_TEMP/kikz-env/wp" tests/integration/e2e.sh 2>&1 | tee "$RUNNER_TEMP/e2e.log"
+          code=${PIPESTATUS[0]}
+          grep -E "FAIL|Fatal|Parse error|Uncaught" "$RUNNER_TEMP/e2e.log" | head -9 | while IFS= read -r line; do echo "::error title=e2e::${line}"; done
+          exit $code
