@@ -59,6 +59,21 @@ update_option('active_plugins', ['ki-kennzeichnung/ki-kennzeichnung.php','elemen
 echo "plugins activated\n";
 PHP
 php activate.php
+
+# Elementor initialises itself on its first load (it writes elementor_install_history and only then
+# treats the site as a new install with the Container feature active). Warm it up, and fail loudly
+# if the Container feature is still off, instead of letting the Elementor tests fail confusingly.
+cat > warmup.php <<'PHP'
+<?php
+require __DIR__.'/wp/wp-load.php';
+echo \Elementor\Plugin::$instance->experiments->is_feature_active('container') ? "container=yes\n" : "container=no\n";
+PHP
+ready=no
+for attempt in 1 2 3; do
+  if php warmup.php 2>/dev/null | grep -q 'container=yes'; then ready=yes; break; fi
+done
+if [ "$ready" != yes ]; then echo "Elementor Container feature did not become active" >&2; exit 1; fi
+echo "Elementor warmed up"
 echo
 echo "Ready. Next:"
 echo "  KIKZ_WP_LOAD=$ENV_DIR/wp/wp-load.php php $PLUGIN_DIR/tests/integration/run.php"

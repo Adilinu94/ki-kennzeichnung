@@ -12,6 +12,11 @@ if ( ! class_exists( '\\Elementor\\Plugin' ) ) {
 	return;
 }
 t( 'Elementor is active', true );
+if ( ! \Elementor\Plugin::$instance->experiments->is_feature_active( 'container' ) ) {
+	// Elementor activates the Container feature only after its very first load (install history).
+	t( 'Elementor Container feature is active (run bin/setup-test-env.sh, it warms Elementor up)', false );
+	return;
+}
 
 /** Find the wrapper of an Elementor element in rendered HTML. */
 function kikz_find_el( string $html, string $data_id ): ?array {
