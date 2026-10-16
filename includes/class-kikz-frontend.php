@@ -198,16 +198,26 @@ final class KI_Kennzeichnung_Frontend {
 			'.elementor-widget.ki-flagged-widget',
 			'.elementor-widget-image:has(img.ki-flagged-image)',
 			'.elementor-image-box-img:has(img.ki-flagged-image)',
+			'.e-atomic-element:has(> img.ki-flagged-image)', // Elementor 4: e-image sits directly in its e-div-block/e-flexbox.
 			':is(figure,.wp-block-cover,.gallery-icon)' . $notnest . ':has(> img.ki-flagged-image,> a > img.ki-flagged-image)',
 		);
 		$relative = array(
+			':where(.ki-flagged-bg.e-atomic-element)', // Zero specificity: never overrides a position the user set.
 			'.ki-anchor',
 			'.ki-badge-anzeigen',
 			'.elementor-widget-image:has(img.ki-flagged-image)',
 			'.elementor-image-box-img:has(img.ki-flagged-image)',
+			':where(.e-atomic-element):has(> img.ki-flagged-image)',
 			':is(figure,.wp-block-cover,.gallery-icon)' . $notnest . ':has(> img.ki-flagged-image,> a > img.ki-flagged-image)',
 		);
-		$after = implode( '::after,', $anchors ) . '::after';
+		// A selector list with one unknown entry is dropped as a whole. Browsers without :has() would
+		// lose the .ki-anchor / .ki-flagged-bg rules too, so wrap every :has() entry in the forgiving :is().
+		$forgiving = static function ( string $sel ): string {
+			return false !== strpos( $sel, ':has(' ) ? ':is(' . $sel . ')' : $sel;
+		};
+		$anchors  = array_map( $forgiving, $anchors );
+		$relative = array_map( $forgiving, $relative );
+		$after    = implode( '::after,', $anchors ) . '::after';
 
 		$css  = ':root{--kikz-bg:' . $col['bg'] . ';--kikz-fg:' . $col['fg'] . ';--kikz-fs:' . $px . 'px;--kikz-label:"' . $label . '";--kikz-font:' . ( '' !== $font ? $font : 'inherit' ) . ';--kikz-l:0px;--kikz-t:0px;--kikz-r:0px;--kikz-b:0px}';
 		$css .= implode( ',', $relative ) . '{position:relative}';

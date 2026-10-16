@@ -177,6 +177,24 @@ $bl = KI_Kennzeichnung_Image::layout( 1000, 600, array_merge( $opts, array( 'pos
 $br = KI_Kennzeichnung_Image::layout( 1000, 600, array_merge( $opts, array( 'position' => 'bottom-right' ) ), array( 'X' ) );
 t( 'left vs right differ', $bl['x'] < $br['x'] );
 
+echo "File type comes from the content, not from the extension or WordPress mime\n";
+// "Modern Image Formats" turns an uploaded PNG into a .webp file while WordPress keeps image/png.
+if ( KI_Kennzeichnung_Image::supports( 'webp' ) ) {
+	$im = make_white( 1000, 700 );
+	imagewebp( $im, "$tmp/mismatch.webp", 85 );
+	imagedestroy( $im );
+	t( 'detect_type sees WebP in a .webp file', 'webp' === KI_Kennzeichnung_Image::detect_type( "$tmp/mismatch.webp" ) );
+	t( 'resolve_type ignores a wrong image/png hint', 'webp' === KI_Kennzeichnung_Image::resolve_type( "$tmp/mismatch.webp", 'image/png' ) );
+	$res = KI_Kennzeichnung_Image::stamp( "$tmp/mismatch.webp", 'png', $opts ); // The caller still says "png".
+	t( 'stamping a WebP file that is announced as PNG works (was: decode_failed)', is_array( $res ), is_string( $res ) ? $res : '' );
+	t( 'and the file stays a WebP', 'webp' === KI_Kennzeichnung_Image::detect_type( "$tmp/mismatch.webp" ) );
+}
+$im = make_white( 800, 500 );
+imagejpeg( $im, "$tmp/jpeg-as.png", 90 );
+imagedestroy( $im );
+t( 'JPEG data in a .png file is stamped as JPEG', is_array( KI_Kennzeichnung_Image::stamp( "$tmp/jpeg-as.png", 'png', $opts ) ) && 'jpeg' === KI_Kennzeichnung_Image::detect_type( "$tmp/jpeg-as.png" ) );
+t( 'a non-image has no type', null === KI_Kennzeichnung_Image::detect_type( __FILE__ ) );
+
 echo "Errors\n";
 t( 'missing file', 'missing' === KI_Kennzeichnung_Image::stamp( "$tmp/nope.jpg", 'jpeg', $opts ) );
 file_put_contents( "$tmp/x.jpg", 'not an image' );

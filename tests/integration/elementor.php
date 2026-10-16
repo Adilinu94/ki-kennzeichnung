@@ -183,6 +183,135 @@ list( , $html_dyn2 ) = kikz_render(
 );
 t( 'the same tag returning a human photo is not labeled', ! kikz_has_class( kikz_find_el( $html_dyn2, 'ctrDYN002' ), 'ki-flagged-bg' ) );
 
+section( 'Elementor 4: atomic containers and the atomic image widget' );
+
+function kikz_atomic_bg( string $id, string $style_id, array $src, string $type = 'e-div-block', array $children = array() ): array {
+	return array(
+		'id'       => $id,
+		'elType'   => $type,
+		'settings' => array( 'classes' => array( '$$type' => 'classes', 'value' => array( $style_id ) ) ),
+		'elements' => $children,
+		'isInner'  => false,
+		'styles'   => array(
+			$style_id => array(
+				'id'       => $style_id,
+				'label'    => 'local',
+				'type'     => 'class',
+				'variants' => array(
+					array(
+						'meta'  => array( 'breakpoint' => 'desktop', 'state' => null ),
+						'props' => array(
+							'background' => array(
+								'$$type' => 'background',
+								'value'  => array(
+									'background-overlay' => array(
+										'$$type' => 'background-overlay',
+										'value'  => array(
+											array(
+												'$$type' => 'background-image-overlay',
+												'value'  => array(
+													'image' => array( '$$type' => 'image', 'value' => array( 'src' => array( '$$type' => 'image-src', 'value' => $src ), 'size' => array( '$$type' => 'string', 'value' => 'large' ) ) ),
+													'size'  => array( '$$type' => 'string', 'value' => 'cover' ),
+												),
+											),
+										),
+									),
+								),
+							),
+						),
+					),
+				),
+			),
+		),
+	);
+}
+
+/** Minimal stand-in for an Elementor element: lets us test our logic without Elementor's Twig renderer. */
+class Kikz_Fake_Element {
+	public $attrs = array();
+	private $name;
+	private $data;
+	public function __construct( string $name, array $data ) {
+		$this->name = $name;
+		$this->data = $data;
+	}
+	public function get_type() {
+		return 'element';
+	}
+	public function get_name() {
+		return $this->name;
+	}
+	public function get_id() {
+		return $this->data['id'];
+	}
+	public function get_data() {
+		return $this->data;
+	}
+	public function get_settings( $k = null ) {
+		return $this->data['settings'] ?? array();
+	}
+	public function get_settings_for_display( $k = null ) {
+		return $this->get_settings();
+	}
+	public function add_render_attribute( $el, $key, $value = null ) {
+		$this->attrs[ $el ][ $key ] = array_merge( (array) ( $this->attrs[ $el ][ $key ] ?? array() ), (array) $value );
+	}
+}
+
+$by_url    = array( 'url' => array( '$$type' => 'url', 'value' => (string) wp_get_attachment_url( $ai ) ) );
+$by_id     = array( 'id' => array( '$$type' => 'image-attachment-id', 'value' => $ai2 ) );
+$human_url = array( 'url' => array( '$$type' => 'url', 'value' => (string) wp_get_attachment_url( $human ) ) );
+
+$fe = new Kikz_Fake_Element( 'e-div-block', kikz_atomic_bg( 'fakeA001', 'e-aaaaaa-0001', $by_url ) );
+KI_Kennzeichnung_Elementor::before_render( $fe );
+$cls = $fe->attrs['_wrapper']['class'] ?? array();
+t( 'atomic detection: flagged background URL in the typed styles -> ki-flagged-bg + ki-auto on the wrapper', in_array( 'ki-flagged-bg', $cls, true ) && in_array( 'ki-auto', $cls, true ), wp_json_encode( $fe->attrs ) );
+t( 'atomic detection: data-kikz-id points at the attachment', array( (string) $ai ) === ( $fe->attrs['_wrapper']['data-kikz-id'] ?? null ) );
+$fe = new Kikz_Fake_Element( 'e-flexbox', kikz_atomic_bg( 'fakeB001', 'e-bbbbbb-0002', $by_id, 'e-flexbox' ) );
+KI_Kennzeichnung_Elementor::before_render( $fe );
+t( 'atomic detection: e-flexbox with an image-attachment-id background', in_array( 'ki-flagged-bg', $fe->attrs['_wrapper']['class'] ?? array(), true ) && array( (string) $ai2 ) === ( $fe->attrs['_wrapper']['data-kikz-id'] ?? null ) );
+$fe = new Kikz_Fake_Element( 'e-div-block', kikz_atomic_bg( 'fakeC001', 'e-cccccc-0003', $human_url ) );
+KI_Kennzeichnung_Elementor::before_render( $fe );
+t( 'atomic detection: a human photo adds nothing', array() === $fe->attrs );
+$fe = new Kikz_Fake_Element( 'e-grid', array( 'id' => 'fakeD001', 'elType' => 'e-grid', 'settings' => array(), 'styles' => array() ) );
+KI_Kennzeichnung_Elementor::before_render( $fe );
+t( 'atomic detection: an element without styles adds nothing and does not fail', array() === $fe->attrs );
+update_option( 'kikz_display_mode', 'overlay' );
+$fe = new Kikz_Fake_Element( 'e-div-block', kikz_atomic_bg( 'fakeE001', 'e-eeeeee-0005', $by_url ) );
+KI_Kennzeichnung_Elementor::before_render( $fe );
+t( 'atomic detection in overlay mode: overlay without ki-auto', in_array( 'ki-flagged-bg', $fe->attrs['_wrapper']['class'] ?? array(), true ) && ! in_array( 'ki-auto', $fe->attrs['_wrapper']['class'] ?? array(), true ) );
+update_option( 'kikz_display_mode', 'auto' );
+t( 'atomic_ids finds typed ids and URLs at any depth and ignores unflagged ones', array( $ai ) === KI_Kennzeichnung_Elementor::atomic_ids( array( 'a' => array( 'b' => array( '$$type' => 'url', 'value' => wp_get_attachment_url( $ai ) ), 'c' => array( '$$type' => 'url', 'value' => wp_get_attachment_url( $human ) ) ) ) ) );
+$audit_tree = kikz_atomic_bg( 'fakeA001', 'e-aaaaaa-0001', $by_url );
+$pid_a      = wp_insert_post( array( 'post_title' => 'kikz-atomic-audit', 'post_type' => 'page', 'post_status' => 'publish' ) );
+$GLOBALS['kikz_cleanup'][] = $pid_a;
+update_post_meta( $pid_a, '_elementor_data', wp_slash( wp_json_encode( array( $audit_tree ) ) ) );
+$ok = KI_Kennzeichnung_Audit::analyze_html( '<div data-id="fakeA001" class="e-con ki-flagged-bg ki-auto"></div>', $pid_a );
+t( 'audit: a labeled atomic background container passes', array() === $ok['issues'], wp_json_encode( $ok ) );
+$bad = KI_Kennzeichnung_Audit::analyze_html( '<div data-id="fakeA001" class="e-con"></div>', $pid_a );
+t( 'audit: an atomic background container delivered without label is caught', ! empty( array_filter( $bad['issues'], static function ( $m ) {
+	return false !== strpos( $m, 'fakeA001' );
+} ) ), wp_json_encode( $bad ) );
+$css_head = '';
+ob_start();
+KI_Kennzeichnung_Frontend::print_styles();
+$css_head = ob_get_clean();
+t( 'CSS anchors the atomic e-image to its container and keeps :has() entries forgiving (:is)', false !== strpos( $css_head, ':is(:where(.e-atomic-element):has(> img.ki-flagged-image))' ) && false !== strpos( $css_head, ':where(.ki-flagged-bg.e-atomic-element)' ), '' );
+
+// Real rendering needs Elementor's scoped Twig (shipped in the release zip, absent from a git checkout).
+if ( ! \Elementor\Plugin::$instance->elements_manager->get_element_types( 'e-div-block' ) || ! class_exists( '\\ElementorDeps\\Twig\\Environment' ) ) {
+	echo "  skip real atomic rendering (needs an Elementor release build with Twig; verified on the live test site instead)\n";
+} else {
+	$img_widget = array( 'id' => 'atomI0001', 'elType' => 'widget', 'widgetType' => 'e-image', 'elements' => array(), 'settings' => array( 'image' => array( '$$type' => 'image', 'value' => array( 'src' => array( '$$type' => 'image-src', 'value' => array( 'id' => array( '$$type' => 'image-attachment-id', 'value' => $ai ) ) ), 'size' => array( '$$type' => 'string', 'value' => 'large' ) ) ) ) );
+	list( $apid, $ahtml ) = kikz_render( array(
+		kikz_atomic_bg( 'atomA0001', 'e-aaaaaa-0001', $by_url ),
+		kikz_atomic_bg( 'atomD0001', 'e-dddddd-0004', $human_url, 'e-div-block', array( $img_widget ) ),
+	) );
+	$aa = kikz_find_el( $ahtml, 'atomA0001' );
+	t( 'rendered e-div-block is labeled and keeps Elementor\'s own classes', kikz_has_class( $aa, 'ki-flagged-bg' ) && kikz_has_class( $aa, 'e-con' ) && kikz_has_class( $aa, 'e-aaaaaa-0001' ), wp_json_encode( $aa ) );
+	t( 'rendered atomic e-image carries the label class', 1 === preg_match( '/<img[^>]*ki-flagged-image/', $ahtml ) );
+}
+
 section( 'Elementor: footer data, audit and panel controls' );
 ob_start();
 Frontend::footer_assets();
@@ -210,20 +339,29 @@ $ov_bad = KI_Kennzeichnung_Audit::analyze_html( '<img src="' . esc_url( wp_get_a
 t( 'audit: in overlay mode the same markup is a problem', ! empty( $ov_bad['issues'] ) );
 update_option( 'kikz_display_mode', 'auto' );
 
-t( 'hooks registered on the verified Elementor names', has_action( 'elementor/frontend/before_render', array( 'KI_Kennzeichnung_Elementor', 'before_render' ) ) && has_filter( 'elementor/widget/render_content', array( 'KI_Kennzeichnung_Elementor', 'filter_widget_content' ) ) && has_action( 'elementor/element/container/section_layout/after_section_end' ) );
+t( 'hooks registered on the verified Elementor names', has_action( 'elementor/frontend/before_render', array( 'KI_Kennzeichnung_Elementor', 'before_render' ) ) && has_filter( 'elementor/widget/render_content', array( 'KI_Kennzeichnung_Elementor', 'filter_widget_content' ) ) && has_action( 'elementor/element/container/section_background/before_section_end' ) && has_action( 'elementor/element/image/section_image/before_section_end' ) );
 $cont = \Elementor\Plugin::$instance->elements_manager->create_element_instance( array( 'id' => 'ctrPNL001', 'elType' => 'container', 'settings' => array(), 'elements' => array() ) );
 $ctl  = $cont ? $cont->get_controls( 'kikz_mode' ) : null;
-t( 'container panel has the kikz_mode select with default "auto"', is_array( $ctl ) && 'select' === $ctl['type'] && 'auto' === $ctl['default'] && 'kikz_section' === $ctl['section'], wp_json_encode( $ctl ) );
+t( 'container: kikz_mode is a select (auto/always/never), default "auto", in Style > Background', is_array( $ctl ) && 'select' === $ctl['type'] && 'auto' === $ctl['default'] && 'section_background' === $ctl['section'] && 'style' === $ctl['tab'] && isset( $ctl['options']['always'], $ctl['options']['never'] ), wp_json_encode( $ctl ) );
 $hd = \Elementor\Plugin::$instance->elements_manager->create_element_instance( array( 'id' => 'hdPNL001', 'elType' => 'widget', 'widgetType' => 'heading', 'settings' => array(), 'elements' => array() ) );
 t( 'unrelated widgets (heading) do not get the control', $hd && null === $hd->get_controls( 'kikz_mode' ) );
-// Which tab/label the section is registered with is only visible while Elementor builds the stack,
-// so that check runs in a fresh process (see panel-tab.php).
-$panel = json_decode( (string) shell_exec( escapeshellarg( PHP_BINARY ) . ' ' . escapeshellarg( __DIR__ . '/panel-tab.php' ) . ' 2>/dev/null' ), true );
-t( 'panel section is registered in the ADVANCED tab as "KI-Kennzeichnung" for container, section, column, image and image-box', is_array( $panel ) && 5 === count( $panel ) && array_reduce( $panel, static function ( $c, $v ) {
-	return $c && 'advanced / KI-Kennzeichnung' === $v;
-}, true ), wp_json_encode( $panel ) );
-$wdg = \Elementor\Plugin::$instance->elements_manager->create_element_instance( array( 'id' => 'imgPNL001', 'elType' => 'widget', 'widgetType' => 'image', 'settings' => array(), 'elements' => array() ) );
-t( 'image widget panel has the select as well', $wdg && is_array( $wdg->get_controls( 'kikz_mode' ) ) );
+// The option must sit where the image is configured, not in a far-away Advanced section.
+$where = array(
+	'container' => 'section_background',
+	'section'   => 'section_background',
+	'column'    => 'section_style',
+	'image'     => 'section_image',
+	'image-box' => 'section_image',
+);
+$placed = array();
+foreach ( $where as $name => $section_id ) {
+	$def  = in_array( $name, array( 'container', 'section', 'column' ), true ) ? array( 'elType' => $name ) : array( 'elType' => 'widget', 'widgetType' => $name );
+	$inst = \Elementor\Plugin::$instance->elements_manager->create_element_instance( $def + array( 'id' => 'pnl' . md5( $name ), 'settings' => array(), 'elements' => array() ) );
+	$c    = $inst ? $inst->get_controls( 'kikz_mode' ) : null;
+	$placed[ $name ] = is_array( $c ) ? $c['section'] : 'MISSING';
+}
+t( 'the option is placed in the section where the image is chosen (Style > Background, Content > Image)', $placed === $where, wp_json_encode( $placed ) );
+t( 'there is no separate far-away "KI-Kennzeichnung" section anymore', null === $cont->get_controls( 'kikz_section' ) );
 t( 'Elementor cache can be cleared (element cache + CSS)', KI_Kennzeichnung_Cache::clear_elementor() );
 
 // The old integration used hooks that do not exist; make sure nobody re-introduces them.

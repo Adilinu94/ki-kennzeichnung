@@ -46,6 +46,38 @@ final class KI_Kennzeichnung_Image {
 	}
 
 	/**
+	 * Detect the real format from the file content. Neither the extension nor the
+	 * WordPress mime type can be trusted: "Modern Image Formats" and similar plugins
+	 * turn an uploaded PNG/JPEG into a .webp file while the attachment keeps saying
+	 * image/png, and imagecreatefrompng() then fails on a WebP file.
+	 */
+	public static function detect_type( string $path ): ?string {
+		$info = is_file( $path ) ? @getimagesize( $path ) : false;
+		if ( ! $info || empty( $info[2] ) ) {
+			return null;
+		}
+		switch ( (int) $info[2] ) {
+			case IMAGETYPE_JPEG:
+				return 'jpeg';
+			case IMAGETYPE_PNG:
+				return 'png';
+			case IMAGETYPE_WEBP:
+				return 'webp';
+		}
+		if ( defined( 'IMAGETYPE_AVIF' ) && (int) $info[2] === IMAGETYPE_AVIF ) {
+			return 'avif';
+		}
+		return null;
+	}
+
+	/**
+	 * Best known type of a file: the content first, the extension/mime as a fallback.
+	 */
+	public static function resolve_type( string $path, string $mime = '' ): ?string {
+		return self::detect_type( $path ) ?? self::type_from( $path, $mime );
+	}
+
+	/**
 	 * Whether GD can read and write the given type here.
 	 */
 	public static function supports( string $type ): bool {
@@ -80,6 +112,10 @@ final class KI_Kennzeichnung_Image {
 		if ( ! is_file( $path ) || ! is_readable( $path ) ) {
 			return 'missing';
 		}
+		$real = self::detect_type( $path );
+		if ( null !== $real ) {
+			$type = $real; // The content decides, not the caller's guess.
+		}
 		if ( ! self::supports( $type ) ) {
 			return 'unsupported';
 		}
@@ -105,6 +141,11 @@ final class KI_Kennzeichnung_Image {
 		$bytes = in_array( $type, array( 'jpeg', 'png' ), true ) ? (string) @file_get_contents( $path ) : '';
 
 		$im = self::load( $path, $type );
+		if ( ! $im ) {
+			// Last resort: let GD sniff the format itself.
+			$raw = (string) @file_get_contents( $path );
+			$im  = '' !== $raw ? @imagecreatefromstring( $raw ) : false;
+		}
 		if ( ! $im ) {
 			return 'decode_failed';
 		}

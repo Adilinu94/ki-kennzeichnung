@@ -9,7 +9,7 @@
  * Hook names were verified against Elementor 3.35:
  * - elementor/frontend/before_render           (all elements, before the opening tag is printed)
  * - elementor/widget/render_content            (filter on the rendered widget HTML)
- * - elementor/element/{stack}/{section}/after_section_end (panel controls)
+ * - elementor/element/{stack}/{section}/before_section_end (panel control inside the existing section)
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -21,6 +21,9 @@ final class KI_Kennzeichnung_Elementor {
 	/** Widgets whose main image is not always rendered through wp_get_attachment_image(). */
 	private const IMAGE_WIDGETS = array( 'image', 'image-box', 'call-to-action', 'testimonial', 'flip-box' );
 
+	/** Elementor 4 atomic containers (backgrounds are stored in their "styles"). */
+	private const ATOMIC_CONTAINERS = array( 'e-div-block', 'e-flexbox', 'e-grid' );
+
 	/** @var array<string,int> widget ID => flagged attachment ID */
 	private static $widget_ids = array();
 
@@ -28,43 +31,52 @@ final class KI_Kennzeichnung_Elementor {
 		add_action( 'elementor/frontend/before_render', array( __CLASS__, 'before_render' ) );
 		add_filter( 'elementor/widget/render_content', array( __CLASS__, 'filter_widget_content' ), 10, 2 );
 
-		add_action( 'elementor/element/container/section_layout/after_section_end', array( __CLASS__, 'add_controls' ) );
-		add_action( 'elementor/element/section/section_advanced/after_section_end', array( __CLASS__, 'add_controls' ) );
-		add_action( 'elementor/element/column/section_advanced/after_section_end', array( __CLASS__, 'add_controls' ) );
-		add_action( 'elementor/element/image/section_image/after_section_end', array( __CLASS__, 'add_controls' ) );
-		add_action( 'elementor/element/image-box/section_image/after_section_end', array( __CLASS__, 'add_controls' ) );
+		// The option sits right where the image is chosen (not in a far-away Advanced section).
+		$places = array(
+			'container' => 'section_background', // Style > Background.
+			'section'   => 'section_background',
+			'column'    => 'section_style',
+			'image'     => 'section_image',      // Content > Image.
+			'image-box' => 'section_image',
+		);
+		foreach ( $places as $stack => $section ) {
+			add_action( "elementor/element/$stack/$section/before_section_end", array( __CLASS__, 'add_controls' ) );
+		}
 	}
 
 	// ---------------------------------------------------------------------
 	// Panel controls.
 	// ---------------------------------------------------------------------
 
+	/**
+	 * Adds the option at the end of an existing section ("before_section_end").
+	 */
 	public static function add_controls( $element ): void {
 		if ( ! is_object( $element ) || ! class_exists( '\\Elementor\\Controls_Manager' ) ) {
 			return;
 		}
-		$element->start_controls_section(
-			'kikz_section',
+		$element->add_control(
+			'kikz_heading',
 			array(
-				'label' => esc_html__( 'KI-Kennzeichnung', 'ki-kennzeichnung' ),
-				'tab'   => \Elementor\Controls_Manager::TAB_ADVANCED,
+				'label'     => esc_html__( 'KI-Kennzeichnung', 'ki-kennzeichnung' ),
+				'type'      => \Elementor\Controls_Manager::HEADING,
+				'separator' => 'before',
 			)
 		);
 		$element->add_control(
 			'kikz_mode',
 			array(
-				'label'       => esc_html__( 'Kennzeichnung', 'ki-kennzeichnung' ),
+				'label'       => esc_html__( 'Als KI-Bild kennzeichnen', 'ki-kennzeichnung' ),
 				'type'        => \Elementor\Controls_Manager::SELECT,
 				'default'     => 'auto',
 				'options'     => array(
-					'auto'   => esc_html__( 'Automatisch (markierte Bilder erkennen)', 'ki-kennzeichnung' ),
-					'always' => esc_html__( 'Immer kennzeichnen', 'ki-kennzeichnung' ),
-					'never'  => esc_html__( 'Nie kennzeichnen', 'ki-kennzeichnung' ),
+					'auto'   => esc_html__( 'Automatisch (Bild in der Mediathek als KI markiert)', 'ki-kennzeichnung' ),
+					'always' => esc_html__( 'Ja, immer kennzeichnen', 'ki-kennzeichnung' ),
+					'never'  => esc_html__( 'Nein, nie kennzeichnen', 'ki-kennzeichnung' ),
 				),
-				'description' => esc_html__( 'Automatisch: Ist das Hintergrund- oder Widget-Bild in der Mediathek als KI-generiert markiert, wird das Badge am Element angezeigt.', 'ki-kennzeichnung' ),
+				'description' => esc_html__( 'Automatisch: Ist das Bild in der Mediathek als KI-generiert markiert, zeigt dieses Element das Badge. „Ja“ erzwingt das Badge auch ohne Markierung (z. B. bei Farbverlauf oder externen Bildern).', 'ki-kennzeichnung' ),
 			)
 		);
-		$element->end_controls_section();
 	}
 
 	// ---------------------------------------------------------------------
@@ -149,6 +161,36 @@ final class KI_Kennzeichnung_Elementor {
 	// Render hooks.
 	// ---------------------------------------------------------------------
 
+	/**
+	 * Flagged attachment IDs inside the data of an Elementor 4 atomic element.
+	 * Backgrounds live in the element's "styles" as typed props, e.g.
+	 * {"$$type":"image-attachment-id","value":123} or {"$$type":"url","value":"https://…/uploads/…"}.
+	 *
+	 * @param mixed $node  Data (array) to walk.
+	 * @return int[]
+	 */
+	public static function atomic_ids( $node, int $depth = 0 ): array {
+		if ( $depth > 16 || ! is_array( $node ) ) {
+			return array();
+		}
+		$type = isset( $node['$$type'] ) ? (string) $node['$$type'] : '';
+		if ( 'image-attachment-id' === $type && isset( $node['value'] ) ) {
+			$id = (int) $node['value'];
+			return ( $id > 0 && KI_Kennzeichnung_Flags::is_flagged( $id ) ) ? array( $id ) : array();
+		}
+		if ( 'url' === $type && isset( $node['value'] ) && is_string( $node['value'] ) ) {
+			$id = KI_Kennzeichnung_Flags::id_from_url( $node['value'] );
+			return $id > 0 ? array( $id ) : array();
+		}
+		$ids = array();
+		foreach ( $node as $child ) {
+			if ( is_array( $child ) ) {
+				$ids = array_merge( $ids, self::atomic_ids( $child, $depth + 1 ) );
+			}
+		}
+		return array_values( array_unique( $ids ) );
+	}
+
 	private static function manual_mode( $element ): string {
 		$raw = (array) $element->get_settings();
 		if ( 'yes' === ( $raw['ki_flagged_bg'] ?? '' ) || 'yes' === ( $raw['_ki_container_flagged'] ?? '' ) ) {
@@ -187,6 +229,21 @@ final class KI_Kennzeichnung_Elementor {
 				foreach ( $ids as $id ) {
 					KI_Kennzeichnung_Frontend::mark_used( $id );
 				}
+			}
+			return;
+		}
+
+		if ( in_array( $element->get_name(), self::ATOMIC_CONTAINERS, true ) ) {
+			$data    = method_exists( $element, 'get_data' ) ? (array) $element->get_data() : array();
+			$ids     = self::atomic_ids( $data['styles'] ?? array() );
+			$classes = $ids ? self::classes_for( $ids ) : '';
+			if ( '' === $classes ) {
+				return;
+			}
+			$element->add_render_attribute( '_wrapper', 'class', explode( ' ', $classes ) );
+			$element->add_render_attribute( '_wrapper', 'data-kikz-id', (string) $ids[0] );
+			foreach ( $ids as $id ) {
+				KI_Kennzeichnung_Frontend::mark_used( $id );
 			}
 			return;
 		}

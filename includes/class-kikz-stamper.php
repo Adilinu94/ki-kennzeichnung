@@ -291,7 +291,7 @@ final class KI_Kennzeichnung_Stamper {
 		$mime = (string) get_post_mime_type( $id );
 		$opts = self::stamp_options();
 
-		$type = KI_Kennzeichnung_Image::type_from( $main, $mime );
+		$type = KI_Kennzeichnung_Image::resolve_type( $main, $mime );
 		if ( null === $type ) {
 			return array( 'main_ok' => false, 'code' => 'unsupported', 'rects' => array() );
 		}
@@ -322,7 +322,7 @@ final class KI_Kennzeichnung_Stamper {
 			if ( $path === $main || ! is_file( $path ) ) {
 				continue;
 			}
-			$t = KI_Kennzeichnung_Image::type_from( $path, '' );
+			$t = KI_Kennzeichnung_Image::resolve_type( $path );
 			if ( null === $t ) {
 				continue;
 			}
@@ -500,7 +500,7 @@ final class KI_Kennzeichnung_Stamper {
 			self::set_status( $id, 'failed', 'missing' );
 			return array( 'ok' => false, 'code' => 'missing' );
 		}
-		$type = KI_Kennzeichnung_Image::type_from( $file, (string) get_post_mime_type( $id ) );
+		$type = KI_Kennzeichnung_Image::resolve_type( $file, (string) get_post_mime_type( $id ) );
 		if ( null === $type || ! KI_Kennzeichnung_Image::supports( $type ) ) {
 			self::set_status( $id, 'unsupported', 'unsupported' );
 			return array( 'ok' => true, 'code' => 'unsupported' );

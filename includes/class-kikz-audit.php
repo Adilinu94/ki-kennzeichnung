@@ -180,8 +180,9 @@ final class KI_Kennzeichnung_Audit {
 			}
 			$settings = (array) ( $node['settings'] ?? array() );
 			$type     = (string) ( $node['elType'] ?? '' );
-			if ( in_array( $type, array( 'container', 'section', 'column' ), true ) && 'never' !== ( $settings['kikz_mode'] ?? 'auto' ) ) {
-				$ids = KI_Kennzeichnung_Elementor::background_ids( $settings );
+			$atomic = in_array( $type, array( 'e-div-block', 'e-flexbox', 'e-grid' ), true );
+			if ( ( $atomic || in_array( $type, array( 'container', 'section', 'column' ), true ) ) && 'never' !== ( $settings['kikz_mode'] ?? 'auto' ) ) {
+				$ids = $atomic ? KI_Kennzeichnung_Elementor::atomic_ids( $node['styles'] ?? array() ) : KI_Kennzeichnung_Elementor::background_ids( $settings );
 				if ( $ids ) {
 					$images++;
 					$needs = '' !== ( 'always' === ( $settings['kikz_mode'] ?? '' ) ? 'x' : self::needs_overlay( $ids ) );

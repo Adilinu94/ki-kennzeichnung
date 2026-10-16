@@ -298,6 +298,30 @@ t( 'filter "unmarked" is the complement', in_array( $plain, $found['unmarked'], 
 t( 'filter "problem" lists images whose stamping failed or fell back', in_array( $rp, $found['problem'], true ) && in_array( $gid, $found['problem'], true ) && ! in_array( $plain, $found['problem'], true ) );
 unset( $GLOBALS['current_screen'] );
 
+section( 'WebP file with a PNG/JPEG mime type (Modern Image Formats)' );
+if ( KI_Kennzeichnung_Image::supports( 'webp' ) ) {
+	$wi = imagecreatetruecolor( 1400, 900 );
+	imagefill( $wi, 0, 0, imagecolorallocate( $wi, 140, 160, 200 ) );
+	$wsrc = wp_tempnam( 'kikz' ) . '.webp';
+	imagewebp( $wi, $wsrc, 85 );
+	imagedestroy( $wi );
+	$wid = kikz_upload( $wsrc, 'kikz-mismatch.webp' );
+	wp_update_post( array( 'ID' => $wid, 'post_mime_type' => 'image/png' ) ); // What the plugin leaves behind.
+	$wf  = get_attached_file( $wid );
+	$wo  = md5_file( $wf );
+	t( 'precondition: .webp file announced as image/png', 'image/png' === get_post_mime_type( $wid ) && 'webp' === KI_Kennzeichnung_Image::detect_type( $wf ) );
+	$r = Flags::set( $wid, true, 'manual', array(), true );
+	t( 'stamping succeeds (the real format is used, not the announced one)', 'ok' === $r['code'] && Flags::is_labeled( $wid ), $r['code'] . ' / ' . (string) get_post_meta( $wid, '_ki_stamp_error', true ) );
+	t( 'the stamped file is still a WebP', 'webp' === KI_Kennzeichnung_Image::detect_type( $wf ) && md5_file( $wf ) !== $wo );
+	$wm = wp_get_attachment_metadata( $wid );
+	t( 'every generated size is stamped as well', ! empty( $wm['sizes'] ) && count( get_post_meta( $wid, '_ki_badge_rects', true ) ) === 1 + count( $wm['sizes'] ) );
+	Flags::set( $wid, false, 'manual', array(), true );
+	t( 'unflagging restores the original byte for byte', md5_file( $wf ) === $wo && ! Flags::is_labeled( $wid ) );
+}
+$pj = kikz_upload( kikz_make_image( 1200, 800, 'png' ), 'kikz-png-in-jpg.jpg' ); // PNG data, .jpg name.
+Flags::set( $pj, true, 'manual', array(), true );
+t( 'PNG data in a .jpg file is stamped too', Flags::is_labeled( $pj ), (string) get_post_meta( $pj, '_ki_stamp_error', true ) );
+
 section( 'Deleting an attachment' );
 $del    = kikz_upload( kikz_make_image( 1200, 800 ), 'kikz-delete.jpg' );
 Flags::set( $del, true, 'manual', array(), true );

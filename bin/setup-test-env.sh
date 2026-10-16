@@ -56,6 +56,9 @@ cat > activate.php <<'PHP'
 <?php
 require __DIR__.'/wp/wp-load.php';
 update_option('active_plugins', ['ki-kennzeichnung/ki-kennzeichnung.php','elementor/elementor.php']);
+// Elementor 4 style atomic elements (e-div-block, e-flexbox, e-image) are an experiment in 3.x.
+update_option('elementor_experiment-e_atomic_elements','active');
+update_option('elementor_experiment-e_classes','active');
 echo "plugins activated\n";
 PHP
 php activate.php
@@ -66,7 +69,8 @@ php activate.php
 cat > warmup.php <<'PHP'
 <?php
 require __DIR__.'/wp/wp-load.php';
-echo \Elementor\Plugin::$instance->experiments->is_feature_active('container') ? "container=yes\n" : "container=no\n";
+$x = \Elementor\Plugin::$instance->experiments;
+echo ($x->is_feature_active('container') && $x->is_feature_active('e_atomic_elements')) ? "container=yes\n" : "container=no\n";
 PHP
 ready=no
 for attempt in 1 2 3; do
