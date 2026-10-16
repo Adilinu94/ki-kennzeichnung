@@ -6,9 +6,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: KI-Kennzeichnung 2.0.0\n"
+"Project-Id-Version: KI-Kennzeichnung 2.0.1\n"
 "Report-Msgid-Bugs-To: https://github.com/Adilinu94/ki-kennzeichnung/issues\n"
-"POT-Creation-Date: 2026-10-14 07:15+0000\n"
+"POT-Creation-Date: 2026-10-16 07:07+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -34,36 +34,37 @@ msgid "Bild ohne Kennzeichnung ausgeliefert: %s"
 msgstr ""
 
 #. translators: 1: element type, 2: Elementor element ID
-#: includes/class-kikz-audit.php:192
+#: includes/class-kikz-audit.php:193
 #, php-format
 msgid "Hintergrundbild ohne Kennzeichnung: %1$s %2$s"
 msgstr ""
 
-#: includes/class-kikz-elementor.php:49 includes/class-kikz-media.php:64
+#: includes/class-kikz-elementor.php:61 includes/class-kikz-media.php:64
 #: includes/class-kikz-media.php:211
 msgid "KI-Kennzeichnung"
 msgstr ""
 
-#: includes/class-kikz-elementor.php:56
-msgid "Kennzeichnung"
+#: includes/class-kikz-elementor.php:69
+msgid "Als KI-Bild kennzeichnen"
 msgstr ""
 
-#: includes/class-kikz-elementor.php:60
-msgid "Automatisch (markierte Bilder erkennen)"
+#: includes/class-kikz-elementor.php:73
+msgid "Automatisch (Bild in der Mediathek als KI markiert)"
 msgstr ""
 
-#: includes/class-kikz-elementor.php:61
-msgid "Immer kennzeichnen"
+#: includes/class-kikz-elementor.php:74
+msgid "Ja, immer kennzeichnen"
 msgstr ""
 
-#: includes/class-kikz-elementor.php:62
-msgid "Nie kennzeichnen"
+#: includes/class-kikz-elementor.php:75
+msgid "Nein, nie kennzeichnen"
 msgstr ""
 
-#: includes/class-kikz-elementor.php:64
+#: includes/class-kikz-elementor.php:77
 msgid ""
-"Automatisch: Ist das Hintergrund- oder Widget-Bild in der Mediathek als KI-"
-"generiert markiert, wird das Badge am Element angezeigt."
+"Automatisch: Ist das Bild in der Mediathek als KI-generiert markiert, zeigt "
+"dieses Element das Badge. „Ja“ erzwingt das Badge auch ohne Markierung (z. "
+"B. bei Farbverlauf oder externen Bildern)."
 msgstr ""
 
 #: includes/class-kikz-media.php:66

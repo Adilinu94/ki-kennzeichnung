@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.0.1
+
+Gefunden beim Test auf einer echten Seite (Elementor 4.3 Beta, PHP 8.4, „Modern Image Formats“).
+
+- **Behoben: „Bild konnte nicht dekodiert werden“.** „Modern Image Formats“ macht aus einem hochgeladenen PNG/JPEG eine `.webp`-Datei, der Medientyp in WordPress bleibt aber `image/png`. Das Plugin vertraute dem Medientyp und versuchte, eine WebP-Datei als PNG zu lesen. Der Dateityp wird jetzt aus dem **Dateiinhalt** bestimmt (Ersatz: `imagecreatefromstring`). Betroffene Bilder: „Alle neu stempeln“ in den Einstellungen.
+- **Behoben: Die Option war im Elementor-Editor nicht auffindbar.** Sie lag im Tab „Erweitert“ zwischen vielen Zusatz-Abschnitten. Jetzt steht sie dort, wo das Bild eingestellt wird: **Stil → Hintergrund** (Container, Section, Spalte) bzw. **Inhalt → Bild** (Bild, Bildbox), mit klareren Bezeichnungen.
+- **Neu: Elementor-4-Container (`e-div-block`, `e-flexbox`, `e-grid`).** Deren Hintergrundbilder liegen in den typisierten `styles`, nicht in den Einstellungen, und wurden bisher nicht erkannt. Das atomare Bild-Widget `e-image` bekommt jetzt einen CSS-Anker. Erzwingen lässt sich das Badge dort über die CSS-Klasse `ki-badge-anzeigen`.
+- CSS: `:has()`-Selektoren stehen in `:is()`, damit ein Browser ohne `:has()` nicht die ganze Regel verwirft.
+
 ## 2.0.0
 
 Große Überarbeitung. Bestehende Einstellungen, Markierungen und Backups werden beim ersten Aufruf des Adminbereichs automatisch übernommen (1.x mit eingeschaltetem Einbrennen wird zum Modus „Automatisch“).
