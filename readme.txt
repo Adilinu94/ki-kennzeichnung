@@ -4,7 +4,7 @@ Tags: ai, label, images, elementor, compliance
 Requires at least: 6.2
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.0.1
+Stable tag: 2.0.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -36,6 +36,9 @@ The overlay works without GD. Burning the badge into files needs the PHP GD exte
 Settings and metadata are removed. Stamped images and the folder with the originals (uploads/ki-kennzeichnung-originals/) are kept on purpose.
 
 == Changelog ==
+
+= 2.0.2 =
+No fatal error anymore when a second copy of the plugin is active, and fixed Windows paths when migrating 1.x backups.
 
 = 2.0.1 =
 Major rewrite, see CHANGELOG.md in the repository.

@@ -205,9 +205,9 @@ final class KI_Kennzeichnung_Stamper {
 	 * Absolute path of the backup for an attachment (may not exist yet).
 	 */
 	public static function backup_path( int $id ): string {
-		$stored = (string) get_post_meta( $id, '_ki_original_file', true );
+		$stored = wp_normalize_path( (string) get_post_meta( $id, '_ki_original_file', true ) );
 		if ( '' !== $stored ) {
-			if ( '/' === $stored[0] || preg_match( '#^[A-Za-z]:[\\\\/]#', $stored ) ) {
+			if ( '/' === $stored[0] || preg_match( '#^[A-Za-z]:/#', $stored ) ) {
 				return $stored; // Legacy 1.x absolute path.
 			}
 			return self::base_dir() . '/' . $stored;
@@ -217,7 +217,10 @@ final class KI_Kennzeichnung_Stamper {
 	}
 
 	private static function store_backup_meta( int $id, string $abs ): void {
-		$base = self::base_dir() . '/';
+		// Store normalised paths only: update_post_meta() runs stripslashes(),
+		// which would turn "C:\…" into "C:…" and break the path on Windows.
+		$base = wp_normalize_path( self::base_dir() ) . '/';
+		$abs  = wp_normalize_path( $abs );
 		update_post_meta( $id, '_ki_original_file', 0 === strpos( $abs, $base ) ? substr( $abs, strlen( $base ) ) : $abs );
 	}
 
@@ -233,12 +236,24 @@ final class KI_Kennzeichnung_Stamper {
 			if ( microtime( true ) - $t0 > 15 ) {
 				break;
 			}
-			$old = (string) $row->meta_value;
-			if ( '' === $old || ! ( '/' === $old[0] || preg_match( '#^[A-Za-z]:[\\\\/]#', $old ) ) || ! is_file( $old ) ) {
+			$old = wp_normalize_path( (string) $row->meta_value );
+			if ( '' === $old || ! ( '/' === $old[0] || preg_match( '#^[A-Za-z]:#', $old ) ) ) {
 				continue;
 			}
-			$new = $dir . '/' . (int) $row->post_id . '-' . wp_basename( $old );
-			if ( @rename( $old, $new ) || ( @copy( $old, $new ) && @unlink( $old ) ) ) {
+			$src = $old;
+			if ( ! is_file( $src ) ) {
+				// Windows: stripslashes() in update_post_meta() removed the
+				// backslashes of the stored absolute path ("C:Users…"). Rebuild
+				// it from the file name next to the attachment.
+				$att = wp_normalize_path( (string) get_attached_file( (int) $row->post_id ) );
+				$alt = '' !== $att ? dirname( $att ) . '/' . wp_basename( $old ) : '';
+				if ( '' === $alt || ! is_file( $alt ) ) {
+					continue;
+				}
+				$src = $alt;
+			}
+			$new = wp_normalize_path( $dir ) . '/' . (int) $row->post_id . '-' . wp_basename( $src );
+			if ( @rename( $src, $new ) || ( @copy( $src, $new ) && @unlink( $src ) ) ) {
 				self::store_backup_meta( (int) $row->post_id, $new );
 			}
 		}

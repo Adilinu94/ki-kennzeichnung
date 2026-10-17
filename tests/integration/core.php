@@ -5,6 +5,10 @@ use KI_Kennzeichnung_Flags as Flags;
 use KI_Kennzeichnung_Stamper as Stamper;
 use KI_Kennzeichnung_Frontend as Frontend;
 
+section( 'A second copy of the plugin cannot take the site down' );
+$second = require KIKZ_FILE; // Must bail out instead of re-declaring the classes.
+t( 'loading the main file a second time does not raise a fatal error', null === $second );
+
 section( 'Stamping pipeline (3200x2000 upload -> -scaled + sizes)' );
 $src = kikz_make_image( 3200, 2000 );
 $id  = kikz_upload( $src, 'kikz-sample.jpg' );

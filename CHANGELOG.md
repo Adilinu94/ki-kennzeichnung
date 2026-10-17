@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.0.2
+
+- **Behoben: Die ganze Seite fiel aus, wenn zwei Kopien des Plugins aktiv waren.** Beide Kopien definieren dieselben Klassen und Konstanten, PHP brach mit „Cannot declare class KI_Kennzeichnung, because the name is already in use" ab. Die zuerst geladene Kopie arbeitet jetzt normal, die zweite lädt nicht mehr und zeigt stattdessen einen Hinweis im Adminbereich. Das passiert zum Beispiel bei einem manuellen Update, wenn der alte Plugin-Ordner liegen bleibt.
+- **Behoben: Windows-Pfade beim Verschieben alter 1.x-Backups.** Pfade werden jetzt normalisiert (`wp_normalize_path()`). Vorher scheiterte der Abgleich mit dem eigenen Ordner an den Backslashes, der absolute Pfad wurde gespeichert und von `update_post_meta()` (stripslashes) zerstört. Betroffen war nur die Migration alter Backups, nicht das normale Stempeln.
+
 ## 2.0.1
 
 Gefunden beim Test auf einer echten Seite (Elementor 4.3 Beta, PHP 8.4, „Modern Image Formats“).

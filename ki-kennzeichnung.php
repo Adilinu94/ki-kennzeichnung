@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       KI-Kennzeichnung
  * Description:       Labels AI-generated images reliably: media-library checkbox, bulk actions and detection, a badge burned into the file and/or shown as overlay (Elementor containers, flexbox, sections, image widgets, backgrounds), alt-text suffix, machine-readable IPTC metadata, a site notice, a page audit and a CSV evidence export.
- * Version:           2.0.1
+ * Version:           2.0.2
  * Requires at least: 6.2
  * Requires PHP:      7.4
  * Author:            Nick Webdesign
@@ -16,7 +16,28 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'KIKZ_VERSION', '2.0.1' );
+/*
+ * Guard against a second active copy of the plugin (an older folder that was
+ * left next to the current one, for example). Both copies declare the same
+ * constants and classes, and PHP stops with a fatal error when they collide,
+ * which takes the whole site down. The copy that loads first wins, the other
+ * one steps aside and warns the administrator.
+ */
+if ( defined( 'KIKZ_VERSION' ) ) {
+	add_action(
+		'admin_notices',
+		static function (): void {
+			if ( ! current_user_can( 'activate_plugins' ) ) {
+				return;
+			}
+			echo '<div class="notice notice-error"><p><strong>KI-Kennzeichnung:</strong> ' . esc_html__( 'Es ist eine zweite Kopie dieses Plugins aktiv. Diese Kopie wurde nicht geladen, damit die Website nicht mit einem schweren Fehler ausfällt. Bitte deaktiviere und entferne die doppelte Kopie.', 'ki-kennzeichnung' ) . '</p></div>';
+		}
+	);
+
+	return;
+}
+
+define( 'KIKZ_VERSION', '2.0.2' );
 define( 'KIKZ_FILE', __FILE__ );
 define( 'KIKZ_DIR', plugin_dir_path( __FILE__ ) );
 define( 'KIKZ_URL', plugin_dir_url( __FILE__ ) );
