@@ -50,9 +50,9 @@ t( 'block-editor image is labeled', in_array( $ai_b, $ids, true ) );
 t( 'the human photo is NOT labeled', ! in_array( $human, $ids, true ) );
 t( 'alt suffix delivered', false !== strpos( $html, 'alt="Strand (KI-generiert)"' ) && false !== strpos( $html, 'alt="Wald (KI-generiert)"' ) && false !== strpos( $html, 'alt="Mensch"' ) );
 t( 'badge CSS is in the head', 1 === preg_match( '/<head.*<style id="ki-kennzeichnung-css">.*<\/head>/s', $html ) );
-t( 'front-end script is loaded once, with the rect data in front of it', 1 === substr_count( $html, 'assets/js/frontend.js' ) && 1 === preg_match( '/window\.kikzData=\{.*?\}.*?frontend\.js/s', $html ) );
+t( 'front-end script is loaded exactly once', 1 === substr_count( $html, 'assets/js/frontend.js' ) );
 t( 'site notice rendered in the footer', false !== strpos( $html, 'ki-footer-hinweis' ) );
-t( 'script data includes the stamped file rects used on the page', false !== strpos( $html, wp_basename( get_attached_file( $ai ) ) ) );
+t( 'every labeled <img> carries its badge geometry (data-kikz-rects) naming the stamped file', preg_match_all( '/<img\b[^>]*data-kikz-rects="[^"]*' . preg_quote( wp_basename( get_attached_file( $ai ) ), '/' ) . '[^"]*"/', $html ) >= 1 );
 
 // The script asset is reachable and syntactically what we ship.
 $js = wp_remote_get( KIKZ_URL . 'assets/js/frontend.js', array( 'sslverify' => false ) );
@@ -89,3 +89,25 @@ $r    = wp_remote_get( home_url( '/?p=' . $pid ), array( 'sslverify' => false, '
 t( 'short link redirects to the same labeled content', 200 === (int) wp_remote_retrieve_response_code( $r ) && false !== strpos( (string) wp_remote_retrieve_body( $r ), 'ki-flagged-image' ) );
 
 update_option( 'kikz_display_mode', 'auto' );
+
+section( 'Elementor over HTTP: cold render and cached render must look the same' );
+if ( class_exists( '\\Elementor\\Plugin' ) && \Elementor\Plugin::$instance->experiments->is_feature_active( 'container' ) ) {
+	update_option( 'kikz_display_mode', 'auto' );
+	update_option( 'kikz_grace_days', '0' );
+	$tree = array( array( 'id' => 'cwBox0001', 'elType' => 'container', 'settings' => array( 'content_width' => 'full', 'background_background' => 'classic', 'background_image' => array( 'url' => (string) wp_get_attachment_url( $ai ), 'id' => $ai, 'size' => '', 'alt' => '', 'source' => 'library' ), 'background_size' => 'cover' ), 'elements' => array(), 'isInner' => false ) );
+	$epid = wp_insert_post( array( 'post_title' => 'kikz-e2e-elementor', 'post_type' => 'page', 'post_status' => 'publish' ) );
+	$GLOBALS['kikz_cleanup'][] = $epid;
+	update_post_meta( $epid, '_elementor_edit_mode', 'builder' );
+	update_post_meta( $epid, '_elementor_template_type', 'wp-page' );
+	update_post_meta( $epid, '_wp_page_template', 'elementor_canvas' );
+	update_post_meta( $epid, '_elementor_data', wp_slash( wp_json_encode( $tree ) ) );
+	\Elementor\Plugin::$instance->files_manager->clear_cache();
+	$visits = array( 'cold (element rendered)' => kikz_fetch( $epid ), 'warm (served from the element cache)' => kikz_fetch( $epid ), 'warm again' => kikz_fetch( $epid ) );
+	foreach ( $visits as $label => $page ) {
+		preg_match( '/<div[^>]*data-id="cwBox0001"[^>]*>/', $page, $wrap );
+		t( "$label: wrapper has ki-flagged-bg and data-kikz-rects", false !== strpos( $wrap[0] ?? '', 'ki-flagged-bg' ) && false !== strpos( $wrap[0] ?? '', 'data-kikz-rects' ), $wrap[0] ?? 'wrapper not found' );
+		t( "$label: the front-end script is loaded (it was missing on every cached request before)", 1 === substr_count( $page, 'assets/js/frontend.js' ), (string) substr_count( $page, 'assets/js/frontend.js' ) );
+	}
+} else {
+	echo "  skip Elementor cold/warm test (Elementor with the Container feature is not available)\n";
+}

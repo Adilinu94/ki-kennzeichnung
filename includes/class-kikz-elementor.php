@@ -226,6 +226,7 @@ final class KI_Kennzeichnung_Elementor {
 			$element->add_render_attribute( '_wrapper', 'class', explode( ' ', $classes ) );
 			if ( $ids ) {
 				$element->add_render_attribute( '_wrapper', 'data-kikz-id', (string) $ids[0] );
+				$element->add_render_attribute( '_wrapper', 'data-kikz-rects', KI_Kennzeichnung_Frontend::rects_json( $ids ) );
 				foreach ( $ids as $id ) {
 					KI_Kennzeichnung_Frontend::mark_used( $id );
 				}
@@ -242,6 +243,7 @@ final class KI_Kennzeichnung_Elementor {
 			}
 			$element->add_render_attribute( '_wrapper', 'class', explode( ' ', $classes ) );
 			$element->add_render_attribute( '_wrapper', 'data-kikz-id', (string) $ids[0] );
+			$element->add_render_attribute( '_wrapper', 'data-kikz-rects', KI_Kennzeichnung_Frontend::rects_json( $ids ) );
 			foreach ( $ids as $id ) {
 				KI_Kennzeichnung_Frontend::mark_used( $id );
 			}
@@ -255,6 +257,7 @@ final class KI_Kennzeichnung_Elementor {
 				if ( '' !== KI_Kennzeichnung_Frontend::overlay_classes( $id ) || 'always' === $mode ) {
 					$element->add_render_attribute( '_wrapper', 'class', 'ki-flagged-widget' );
 					$element->add_render_attribute( '_wrapper', 'data-kikz-id', (string) $id );
+					$element->add_render_attribute( '_wrapper', 'data-kikz-rects', KI_Kennzeichnung_Frontend::rects_json( array( $id ) ) );
 					KI_Kennzeichnung_Frontend::mark_used( $id );
 				}
 			} elseif ( 'always' === $mode ) {
@@ -315,6 +318,7 @@ final class KI_Kennzeichnung_Elementor {
 					}
 					if ( $classes ) {
 						$p->set_attribute( 'data-kikz-id', (string) $id );
+						$p->set_attribute( 'data-kikz-rects', KI_Kennzeichnung_Frontend::rects_json( array( $id ) ) );
 						KI_Kennzeichnung_Frontend::mark_used( $id );
 					}
 					$alt = $p->get_attribute( 'alt' );
@@ -335,6 +339,7 @@ final class KI_Kennzeichnung_Elementor {
 								$p->add_class( 'ki-auto' );
 							}
 							$p->set_attribute( 'data-kikz-id', (string) $id );
+							$p->set_attribute( 'data-kikz-rects', KI_Kennzeichnung_Frontend::rects_json( array( $id ) ) );
 							KI_Kennzeichnung_Frontend::mark_used( $id );
 							$changed = true;
 						}

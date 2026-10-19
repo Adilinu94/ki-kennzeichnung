@@ -57,6 +57,55 @@ final class KI_Kennzeichnung_Frontend {
 	}
 
 	/**
+	 * Badge geometry for the script, as JSON for a data-kikz-rects attribute:
+	 * every file name of the attachment => [x, y, w, h] fractions, or 0 when that file carries no badge.
+	 *
+	 * It travels WITH the element on purpose. Elementor (and other layers) serve rendered elements from
+	 * their cache without running our PHP again, so anything collected during rendering and printed in
+	 * the footer would be missing on every cached request.
+	 *
+	 * @param int[] $ids Attachment IDs.
+	 */
+	public static function rects_json( array $ids ): string {
+		$out = array();
+		foreach ( $ids as $id ) {
+			$id    = (int) $id;
+			$rects = get_post_meta( $id, '_ki_badge_rects', true );
+			$rects = is_array( $rects ) ? $rects : array();
+			$meta  = wp_get_attachment_metadata( $id );
+			$files = array();
+			if ( is_array( $meta ) && ! empty( $meta['file'] ) ) {
+				$files[] = wp_basename( (string) $meta['file'] );
+				foreach ( (array) ( $meta['sizes'] ?? array() ) as $size ) {
+					if ( ! empty( $size['file'] ) ) {
+						$files[] = (string) $size['file'];
+					}
+					foreach ( (array) ( $size['sources'] ?? array() ) as $src ) {
+						if ( ! empty( $src['file'] ) ) {
+							$files[] = (string) $src['file'];
+						}
+					}
+				}
+				foreach ( (array) ( $meta['sources'] ?? array() ) as $src ) {
+					if ( ! empty( $src['file'] ) ) {
+						$files[] = (string) $src['file'];
+					}
+				}
+				if ( ! empty( $meta['original_image'] ) ) {
+					$files[] = (string) $meta['original_image'];
+				}
+			}
+			foreach ( array_unique( $files ) as $name ) {
+				$out[ $name ] = isset( $rects[ $name ] ) && is_array( $rects[ $name ] ) ? $rects[ $name ] : 0;
+			}
+			foreach ( $rects as $name => $rect ) {
+				$out[ $name ] = $rect;
+			}
+		}
+		return (string) wp_json_encode( $out );
+	}
+
+	/**
 	 * Append the alt-text suffix to a non-empty alt text (once).
 	 */
 	public static function alt_with_suffix( string $alt ): string {
@@ -81,8 +130,9 @@ final class KI_Kennzeichnung_Frontend {
 		}
 		$classes = self::overlay_classes( $id );
 		if ( '' !== $classes ) {
-			$attr['class']        = trim( (string) ( $attr['class'] ?? '' ) . ' ' . $classes );
-			$attr['data-kikz-id'] = (string) $id;
+			$attr['class']            = trim( (string) ( $attr['class'] ?? '' ) . ' ' . $classes );
+			$attr['data-kikz-id']     = (string) $id;
+			$attr['data-kikz-rects']  = self::rects_json( array( $id ) );
 			self::mark_used( $id ); // The script is only needed where an overlay may be shown.
 		}
 		if ( isset( $attr['alt'] ) ) {
@@ -123,6 +173,7 @@ final class KI_Kennzeichnung_Frontend {
 		}
 		if ( $classes ) {
 			$p->set_attribute( 'data-kikz-id', (string) $id );
+			$p->set_attribute( 'data-kikz-rects', self::rects_json( array( $id ) ) );
 			self::mark_used( $id );
 		}
 		$alt = $p->get_attribute( 'alt' );
@@ -238,43 +289,33 @@ final class KI_Kennzeichnung_Frontend {
 	}
 
 	/**
-	 * Enqueue the script when flagged images were rendered, with the rect data.
+	 * Does this page need the script? Yes when we decorated something, and also when Elementor printed
+	 * content: its element cache hands out HTML that was rendered earlier, without calling our render
+	 * hooks, so nothing was recorded for those elements on this request.
+	 */
+	private static function needs_script(): bool {
+		if ( ! empty( self::$used ) ) {
+			return true;
+		}
+		return KI_Kennzeichnung_Flags::has_flagged()
+			&& class_exists( '\\Elementor\\Plugin' )
+			&& isset( \Elementor\Plugin::$instance->frontend )
+			&& \Elementor\Plugin::$instance->frontend->has_elementor_in_page();
+	}
+
+	/**
+	 * Enqueue the script. The badge geometry is not printed here: it sits on the elements
+	 * (data-kikz-rects) so it survives every kind of HTML cache.
 	 */
 	public static function footer_assets(): void {
-		if ( empty( self::$used ) ) {
+		if ( ! self::needs_script() ) {
 			return;
 		}
-		$data = array( 'rects' => (object) array(), 'names' => (object) array(), 'minBadge' => 15 );
-		$rects = array();
-		$names = array();
-		foreach ( array_keys( self::$used ) as $id ) {
-			$r = get_post_meta( (int) $id, '_ki_badge_rects', true );
-			if ( is_array( $r ) ) {
-				$rects = array_merge( $rects, $r );
-			}
-			$meta = wp_get_attachment_metadata( (int) $id );
-			if ( is_array( $meta ) && ! empty( $meta['file'] ) ) {
-				$names[ wp_basename( $meta['file'] ) ] = (int) $id;
-				foreach ( (array) ( $meta['sizes'] ?? array() ) as $s ) {
-					if ( ! empty( $s['file'] ) ) {
-						$names[ $s['file'] ] = (int) $id;
-					}
-				}
-				if ( ! empty( $meta['original_image'] ) ) {
-					$names[ $meta['original_image'] ] = (int) $id;
-				}
-			}
-			if ( count( $names ) > 800 ) {
-				break;
-			}
-		}
-		$data['rects'] = (object) $rects;
-		$data['names'] = (object) $names;
 		if ( ! wp_script_is( 'kikz-frontend', 'registered' ) ) {
 			self::register_script(); // A theme or optimiser may have reset the registry.
 		}
 		wp_enqueue_script( 'kikz-frontend' );
-		wp_add_inline_script( 'kikz-frontend', 'window.kikzData=' . wp_json_encode( $data ) . ';', 'before' );
+		wp_add_inline_script( 'kikz-frontend', 'window.kikzData=' . wp_json_encode( array( 'minBadge' => 15 ) ) . ';', 'before' );
 	}
 
 	// ---------------------------------------------------------------------

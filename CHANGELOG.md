@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.0.3
+
+- **Behoben: Auf Elementor-Seiten fehlte das Frontend-Skript bei jedem Aufruf nach dem ersten.** Elementor liefert gerenderte Elemente aus seinem Element-Cache, ohne unsere Render-Hooks erneut auszuführen. Das Plugin band das Skript aber nur ein, wenn beim Rendern etwas aufgezeichnet wurde. Folge auf zwischengespeicherten Seiten: Overlays standen dauerhaft **zusätzlich** zum eingebrannten Badge (doppeltes Badge), und bei einem Bild, das schmaler als sein Widget ist, saß das Badge an der falschen Ecke (die Korrektur kommt aus dem Skript). Jetzt gilt: Das Skript wird auf jeder Seite geladen, auf der Elementor Inhalt ausgegeben hat und markierte Bilder existieren, und die Badge-Rechtecke stehen als Attribut `data-kikz-rects` **am Element selbst**, werden also mit dem Element gecacht (auch bei Seiten-Caches und Lightbox-Bildern). Der Footer enthält keine Rechteck-Daten mehr.
+- Tests: Der Browser-Test prüft die Elementor-Seite jetzt kalt und warm, der HTTP-Test ebenso. Ein Mutationstest mit dem alten Verhalten lässt genau die warmen Besuche durchfallen.
+- **Behoben: Der Schutz vor einer zweiten Plugin-Kopie (2.0.2) griff bei der wahrscheinlichsten Kollision nicht.** Er prüfte nur, ob `KIKZ_VERSION` schon definiert ist. Die alte 1.x-Version hat diese Konstante nie definiert, sie deklariert nur die Klasse `KI_Kennzeichnung`. Lud eine noch aktive 1.x-Kopie zuerst, stürzte die neue Kopie trotzdem mit „Cannot declare class“ ab. Der Schutz erkennt jetzt auch eine bereits geladene Klasse `KI_Kennzeichnung`. (Lädt die 1.x-Kopie *nach* der neuen, stürzt die alte ab; sie hat keinen Schutz. Dann den alten Ordner deaktivieren und löschen.)
+- **Dafür umgebaut:** PHP deklariert Klassen auf oberster Ebene schon beim Kompilieren einer Datei, also bevor ein Schutz in derselben Datei laufen könnte. Die Klasse `KI_Kennzeichnung` liegt deshalb jetzt in `includes/class-kikz-bootstrap.php`, die Hauptdatei enthält nur noch Schutz, Konstanten und die `require`-Aufrufe.
+- Tests: `tests/test-guard.php` stellt drei Fälle in getrennten Prozessen nach (alte 1.x-Klasse geladen, zweite 2.x-Kopie, saubere Installation) und stellt sicher, dass der Schutz die einzige Kopie nie aussperrt.
+
 ## 2.0.2
 
 - **Behoben: Die ganze Seite fiel aus, wenn zwei Kopien des Plugins aktiv waren.** Beide Kopien definieren dieselben Klassen und Konstanten, PHP brach mit „Cannot declare class KI_Kennzeichnung, because the name is already in use" ab. Die zuerst geladene Kopie arbeitet jetzt normal, die zweite lädt nicht mehr und zeigt stattdessen einen Hinweis im Adminbereich. Das passiert zum Beispiel bei einem manuellen Update, wenn der alte Plugin-Ordner liegen bleibt.

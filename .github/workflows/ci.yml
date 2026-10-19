@@ -30,6 +30,7 @@ jobs:
         with:
           node-version: '22'
       - run: php tests/test-image.php
+      - run: php tests/test-guard.php
       - run: npm ci
       - run: npm test
 
@@ -46,7 +47,12 @@ jobs:
           echo "::notice title=PHP::$(php -v | head -1)"
           echo "::notice title=GD::$(php -r 'echo json_encode(array_intersect_key(gd_info(), array_flip(["GD Version","FreeType Support","WebP Support","AVIF Support","JPEG Support","PNG Support"])));')"
           echo "::notice title=Imagick::$(php -r 'echo class_exists("Imagick") ? "yes" : "no";')"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
       - run: bin/setup-test-env.sh "$RUNNER_TEMP/kikz-env"
+      - name: Rebuild Elementor's Twig and CSS (real atomic rendering)
+        run: bin/build-elementor-assets.sh "$RUNNER_TEMP/kikz-env"
       - name: Integration tests
         run: |
           set +e
@@ -63,3 +69,29 @@ jobs:
           code=${PIPESTATUS[0]}
           grep -E "FAIL|Fatal|Parse error|Uncaught" "$RUNNER_TEMP/e2e.log" | head -9 | while IFS= read -r line; do echo "::error title=e2e::${line}"; done
           exit $code
+
+  browser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: gd, mbstring, xml, exif, zip, curl, intl, sqlite3, pdo_sqlite
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: bin/setup-test-env.sh "$RUNNER_TEMP/kikz-env"
+      - run: bin/build-elementor-assets.sh "$RUNNER_TEMP/kikz-env"
+      - name: Real-browser layout tests
+        run: |
+          set +e
+          KIKZ_WP_DIR="$RUNNER_TEMP/kikz-env/wp" tests/browser/run.sh 2>&1 | tee "$RUNNER_TEMP/browser.log"
+          code=${PIPESTATUS[0]}
+          grep -E "FAIL|Error" "$RUNNER_TEMP/browser.log" | head -9 | while IFS= read -r line; do echo "::error title=browser::${line}"; done
+          exit $code
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: browser-screenshots
+          path: /tmp/kikz-shots

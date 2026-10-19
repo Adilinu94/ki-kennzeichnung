@@ -13,6 +13,10 @@ const script = require('../assets/js/frontend.js');
 let n = 0;
 function t(name, fn) { try { fn(); n++; console.log('  ok   ' + name); } catch (e) { console.log('  FAIL ' + name + '\n       ' + e.message); process.exitCode = 1; } }
 
+function tAsync(name, promise) {
+	return promise.then(() => { n++; console.log('  ok   ' + name); }, (e) => { process.exitCode = 1; console.log('  FAIL ' + name + '\n       ' + e.message); });
+}
+
 const RECT = [0.84, 0.93, 0.15, 0.045]; // badge bottom-right, as stored by the stamper.
 
 function make(html, data, stubs) {
@@ -123,6 +127,63 @@ t('<a><img></a> inside a figure: the figure stays the anchor (CSS handles it, no
 	api.run();
 	assert.ok(!doc.getElementById('f').classList.contains('ki-anchor'));
 });
+
+console.log('geometry from the element itself (data-kikz-rects), no global data');
+const NODATA = { minBadge: 15 };
+const ATTR = JSON.stringify({ 'a.jpg': RECT, 'a-300x200.jpg': [0.6, 0.78, 0.37, 0.16], 'unstamped.jpg': 0 });
+t('overlay hidden using only the element attribute (works after an HTML/Elementor cache hit)', () => {
+	const { doc, api } = make('<figure id="f"><img id="i" class="ki-flagged-image ki-auto" data-kikz-rects=\'' + ATTR + '\' src="https://x.test/up/a.jpg"></figure>', NODATA, styleStub(() => ({ objectFit: 'fill', objectPosition: '50% 50%' })));
+	sizeImg(doc.getElementById('i'), 1200, 800, 600, 400);
+	api.run();
+	assert.strictEqual(doc.getElementById('f').getAttribute('data-kikz-ok'), '1');
+});
+t('the attribute is parsed once per element (no repeated work on every frame)', () => {
+	const { doc, api } = make('<figure id="f"><img id="i" class="ki-flagged-image ki-auto" data-kikz-rects=\'' + ATTR + '\' src="https://x.test/up/a.jpg"></figure>', NODATA, styleStub(() => ({ objectFit: 'fill' })));
+	sizeImg(doc.getElementById('i'), 1200, 800, 600, 400);
+	api.run(); api.run();
+	assert.strictEqual(doc.getElementById('i').__kikzLearned, true);
+});
+t('a broken attribute is ignored, the overlay simply stays', () => {
+	const { doc, api } = make('<figure id="f"><img id="i" class="ki-flagged-image ki-auto" data-kikz-rects="{not json" src="https://x.test/up/a.jpg"></figure>', NODATA, styleStub(() => ({ objectFit: 'fill' })));
+	sizeImg(doc.getElementById('i'), 1200, 800, 600, 400);
+	assert.doesNotThrow(() => api.run());
+	assert.strictEqual(doc.getElementById('f').getAttribute('data-kikz-ok'), null);
+});
+t('a file without a badge (value 0) never counts as "badge visible"', () => {
+	const { doc, api } = make('<figure id="f"><img id="i" class="ki-flagged-image ki-auto" data-kikz-rects=\'' + ATTR + '\' src="https://x.test/up/unstamped.jpg"></figure>', NODATA, styleStub(() => ({ objectFit: 'fill' })));
+	sizeImg(doc.getElementById('i'), 1200, 800, 600, 400);
+	api.run();
+	assert.strictEqual(doc.getElementById('f').getAttribute('data-kikz-ok'), null);
+});
+(async () => {
+	const e = make('<div id="c" class="e-con ki-flagged-bg ki-auto" data-kikz-rects=\'' + ATTR + '\'></div>', NODATA, (w) => {
+		styleStub((el) => (el.id === 'c' ? { position: 'relative', backgroundImage: 'url("https://x.test/up/a.jpg")', backgroundSize: 'cover', backgroundPosition: '100% 100%', backgroundRepeat: 'no-repeat', backgroundAttachment: 'scroll' } : null))(w);
+		w.Image = function () { const self = this; Object.defineProperty(this, 'src', { set() { self.naturalWidth = 1200; self.naturalHeight = 800; w.setTimeout(() => self.onload && self.onload(), 0); } }); };
+	});
+	const c = e.doc.getElementById('c');
+	Object.defineProperty(c, 'clientWidth', { value: 900, configurable: true });
+	Object.defineProperty(c, 'clientHeight', { value: 600, configurable: true });
+	e.api.run();
+	await new Promise((r) => e.w.setTimeout(r, 30));
+	await tAsync('Elementor wrapper attribute alone is enough to hide the overlay (bottom-right cover at 3:2)', Promise.resolve().then(() => assert.strictEqual(c.getAttribute('data-kikz-ok'), '1')));
+})();
+const lateImages = (() => {
+	const e = make('<div id="host"><img id="seed" class="ki-flagged-image" data-kikz-rects=\'' + ATTR + '\' src="https://x.test/up/a-300x200.jpg"></div>', NODATA);
+	const lb = e.doc.createElement('div');
+	lb.className = 'elementor-lightbox';
+	lb.innerHTML = '<img id="lb1" src="https://x.test/up/a.jpg"><img id="lb2" src="https://x.test/up/unstamped.jpg"><img id="lb3" src="https://x.test/up/other.jpg">';
+	e.doc.getElementById('host').appendChild(lb);
+	return new Promise((resolve, reject) => e.w.setTimeout(() => {
+		try {
+			const c = (id) => e.doc.getElementById(id).classList;
+			assert.ok(c('lb1').contains('ki-flagged-image') && c('lb1').contains('ki-auto'), 'stamped file adopted with ki-auto');
+			assert.ok(c('lb2').contains('ki-flagged-image') && !c('lb2').contains('ki-auto'), 'unstamped file adopted WITHOUT ki-auto');
+			assert.ok(!c('lb3').contains('ki-flagged-image'), 'unrelated file left alone');
+			resolve();
+		} catch (err) { reject(err); }
+	}, 40));
+})();
+tAsync('file names for late images (lightbox) are learned from attributes already in the page', lateImages);
 
 console.log('CSS backgrounds (Elementor containers)');
 function bgEnv(styles, natural) {

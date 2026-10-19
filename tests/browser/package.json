@@ -1,0 +1,14 @@
+{
+  "name": "ki-kennzeichnung-browser-tests",
+  "private": true,
+  "description": "Real-browser layout tests (headless Chromium bundled in an npm package). Dev only.",
+  "type": "module",
+  "scripts": {
+    "test": "node browser.test.mjs"
+  },
+  "dependencies": {
+    "@sparticuz/chromium": "^131.0.0",
+    "pngjs": "^7.0.0",
+    "puppeteer-core": "^23.0.0"
+  }
+}

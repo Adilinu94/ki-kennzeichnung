@@ -132,6 +132,24 @@
 		var scheduled = false;
 		var bgImages = {};
 
+		/**
+		 * Badge geometry travels on the element itself (data-kikz-rects): name -> [x,y,w,h] or 0.
+		 * That survives Elementor's element cache and any HTML cache, which hand out markup without
+		 * running the plugin's PHP again.
+		 */
+		function learn(el) {
+			if (!el || el.__kikzLearned || !el.getAttribute) { return; }
+			var raw = el.getAttribute('data-kikz-rects');
+			if (!raw) { return; }
+			el.__kikzLearned = true;
+			var map, id = el.getAttribute('data-kikz-id') || 1;
+			try { map = JSON.parse(raw); } catch (e) { return; }
+			Object.keys(map).forEach(function (name) {
+				names[name] = id;
+				if (map[name] && map[name].length === 4) { rects[name] = map[name]; }
+			});
+		}
+
 		function setVars(anchor, l, t, r, b) {
 			var st = anchor.style;
 			st.setProperty('--kikz-l', Math.max(0, Math.round(l)) + 'px');
@@ -164,6 +182,7 @@
 		}
 
 		function evalImg(img) {
+			learn(img);
 			var anchor = anchorFor(img);
 			if (!anchor) { return; }
 			insets(anchor, img);
@@ -179,6 +198,7 @@
 		}
 
 		function evalBg(el) {
+			learn(el);
 			var cs = win.getComputedStyle(el);
 			if (cs.position === 'static' && !el.classList.contains('ki-anchor')) { el.classList.add('ki-anchor'); }
 			if (!el.classList.contains('ki-auto')) { return; }
@@ -205,7 +225,8 @@
 
 		function run() {
 			scheduled = false;
-			var i, list = doc.querySelectorAll('img.ki-flagged-image'), bgs = doc.querySelectorAll('.ki-flagged-bg');
+			var i, list = doc.querySelectorAll('img.ki-flagged-image'), bgs = doc.querySelectorAll('.ki-flagged-bg'), withData = doc.querySelectorAll('[data-kikz-rects]');
+			for (i = 0; i < withData.length; i++) { learn(withData[i]); } // also teaches the file names for late images (lightbox).
 			for (i = 0; i < list.length; i++) { evalImg(list[i]); }
 			for (i = 0; i < bgs.length; i++) { evalBg(bgs[i]); }
 		}
@@ -219,6 +240,7 @@
 		/** Label images that appear later (lightbox, sliders). */
 		function adopt(img) {
 			if (!img || img.nodeType !== 1 || img.tagName !== 'IMG' || img.classList.contains('ki-flagged-image')) { return; }
+			learn(img);
 			var name = basename(img.currentSrc || img.src);
 			if (!names[name]) { return; }
 			img.classList.add('ki-flagged-image');

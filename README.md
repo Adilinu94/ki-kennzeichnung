@@ -57,7 +57,7 @@ Beim Einbrennen bleibt die Bild-URL gleich. Das Plugin leert deshalb gebündelt 
 
 ## Bekannte Grenzen
 
-- Das Layout im Browser (Position/Anker des Overlays, Verhalten bei `cover`) ist durch Rechenlogik-, DOM- und Server-Tests abgesichert, aber nicht durch automatisierte Screenshots in echten Browsern. Prüfe neue Layouts einmal mit der **Seitenprüfung** und per Augenschein.
+- Das Layout (Position und Anker des Overlays, Verhalten bei `cover`, kalter und gecachter Elementor-Aufruf) wird in einem echten **Chromium** getestet (Chrome 131 über das npm-Paket `@sparticuz/chromium`), nicht in Firefox oder Safari. Prüfe neue Layouts trotzdem einmal mit der **Seitenprüfung** und per Augenschein.
 - Die unskalierte Originaldatei (`original_image`, z. B. `foto.jpg` neben `foto-scaled.jpg`) wird nicht gestempelt, bleibt aber unverlinkt.
 - WebP/AVIF werden gestempelt, tragen aber keine Metadaten (nur JPEG/PNG). GIF/SVG: nur Overlay.
 - Im Elementor-Editor erscheint das Label nach dem Neuladen der Vorschau, nicht bei jeder Live-Änderung.
@@ -90,6 +90,10 @@ php tests/test-image.php         # Stempel-Bibliothek ohne WordPress
 bin/setup-test-env.sh /tmp/kikz-env
 KIKZ_WP_LOAD=/tmp/kikz-env/wp/wp-load.php php tests/integration/run.php
 KIKZ_WP_DIR=/tmp/kikz-env/wp tests/integration/e2e.sh
+
+# Elementor-4-Elemente rendern und echter Browser: Elementors Twig und CSS aus den Quellen nachbauen
+bin/build-elementor-assets.sh /tmp/kikz-env
+KIKZ_WP_DIR=/tmp/kikz-env/wp tests/browser/run.sh      # lädt Chromium über npm, Screenshots in /tmp/kikz-shots
 ```
 
 Das Setup-Skript klont WordPress, Elementor und die SQLite-Integration von GitHub (Versionen per `WP_VERSION`, `ELEMENTOR_VERSION` einstellbar). Release-Zip ohne Entwicklungsdateien: `.distignore` beachten.

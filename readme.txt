@@ -4,7 +4,7 @@ Tags: ai, label, images, elementor, compliance
 Requires at least: 6.2
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.0.2
+Stable tag: 2.0.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -36,6 +36,10 @@ The overlay works without GD. Burning the badge into files needs the PHP GD exte
 Settings and metadata are removed. Stamped images and the folder with the originals (uploads/ki-kennzeichnung-originals/) are kept on purpose.
 
 == Changelog ==
+
+= 2.0.3 =
+Fixes a missing front-end script on cached Elementor pages (double badges / badge at the wrong corner). The geometry now lives on the elements.
+The duplicate-copy guard now also recognises an old 1.x copy, and the 2.0.2 guard no longer depends on class loading order.
 
 = 2.0.2 =
 No fatal error anymore when a second copy of the plugin is active, and fixed Windows paths when migrating 1.x backups.

@@ -313,12 +313,19 @@ if ( ! \Elementor\Plugin::$instance->elements_manager->get_element_types( 'e-div
 }
 
 section( 'Elementor: footer data, audit and panel controls' );
+$g = kikz_find_el( $html, 'ctrG0001' );
+preg_match( '/<[^>]*data-id="ctrG0001"[^>]*>/', $html, $wrapG );
+t( 'container wrapper carries data-kikz-rects naming the stamped background file', false !== strpos( html_entity_decode( $wrapG[0] ?? '' ), wp_basename( get_attached_file( $ai2 ) ) ) && false !== strpos( $wrapG[0] ?? '', 'data-kikz-rects' ), substr( $wrapG[0] ?? '', 0, 200 ) );
+
+// Elementor serves cached elements without running our render hooks: $used stays empty on such requests.
+$ref = new ReflectionProperty( 'KI_Kennzeichnung_Frontend', 'used' );
+$ref->setAccessible( true );
+$ref->setValue( null, array() );
+wp_dequeue_script( 'kikz-frontend' );
 ob_start();
 Frontend::footer_assets();
 ob_end_clean();
-$inline = wp_scripts()->get_data( 'kikz-frontend', 'before' );
-$inline = is_array( $inline ) ? implode( '', $inline ) : (string) $inline;
-t( 'script data covers images used only as Elementor backgrounds', false !== strpos( $inline, wp_basename( get_attached_file( $ai2 ) ) ), substr( $inline, 0, 160 ) );
+t( 'the script is still enqueued when nothing was rendered by us but Elementor printed content', wp_script_is( 'kikz-frontend', 'enqueued' ) );
 
 $issues = KI_Kennzeichnung_Audit::analyze_html( $html, $pid );
 t( 'audit: a correctly rendered Elementor page has no issues', array() === $issues['issues'], wp_json_encode( $issues ) );
@@ -342,25 +349,25 @@ update_option( 'kikz_display_mode', 'auto' );
 t( 'hooks registered on the verified Elementor names', has_action( 'elementor/frontend/before_render', array( 'KI_Kennzeichnung_Elementor', 'before_render' ) ) && has_filter( 'elementor/widget/render_content', array( 'KI_Kennzeichnung_Elementor', 'filter_widget_content' ) ) && has_action( 'elementor/element/container/section_background/before_section_end' ) && has_action( 'elementor/element/image/section_image/before_section_end' ) );
 $cont = \Elementor\Plugin::$instance->elements_manager->create_element_instance( array( 'id' => 'ctrPNL001', 'elType' => 'container', 'settings' => array(), 'elements' => array() ) );
 $ctl  = $cont ? $cont->get_controls( 'kikz_mode' ) : null;
-t( 'container: kikz_mode is a select (auto/always/never), default "auto", in Style > Background', is_array( $ctl ) && 'select' === $ctl['type'] && 'auto' === $ctl['default'] && 'section_background' === $ctl['section'] && 'style' === $ctl['tab'] && isset( $ctl['options']['always'], $ctl['options']['never'] ), wp_json_encode( $ctl ) );
+t( 'container: kikz_mode control exists (select, default auto)', is_array( $ctl ) && 'select' === $ctl['type'] && 'auto' === $ctl['default'], wp_json_encode( $ctl ) );
 $hd = \Elementor\Plugin::$instance->elements_manager->create_element_instance( array( 'id' => 'hdPNL001', 'elType' => 'widget', 'widgetType' => 'heading', 'settings' => array(), 'elements' => array() ) );
 t( 'unrelated widgets (heading) do not get the control', $hd && null === $hd->get_controls( 'kikz_mode' ) );
 // The option must sit where the image is configured, not in a far-away Advanced section.
-$where = array(
-	'container' => 'section_background',
-	'section'   => 'section_background',
-	'column'    => 'section_style',
-	'image'     => 'section_image',
-	'image-box' => 'section_image',
+$panel = json_decode( (string) shell_exec( escapeshellarg( PHP_BINARY ) . ' ' . escapeshellarg( __DIR__ . '/panel-check.php' ) . ' 2>/dev/null' ), true );
+$expect = array(
+	'container' => array( 'section_background', 'style' ),
+	'section'   => array( 'section_background', 'style' ),
+	'column'    => array( 'section_style', 'style' ),
+	'image'     => array( 'section_image', 'content' ),
+	'image-box' => array( 'section_image', 'content' ),
 );
-$placed = array();
-foreach ( $where as $name => $section_id ) {
-	$def  = in_array( $name, array( 'container', 'section', 'column' ), true ) ? array( 'elType' => $name ) : array( 'elType' => 'widget', 'widgetType' => $name );
-	$inst = \Elementor\Plugin::$instance->elements_manager->create_element_instance( $def + array( 'id' => 'pnl' . md5( $name ), 'settings' => array(), 'elements' => array() ) );
-	$c    = $inst ? $inst->get_controls( 'kikz_mode' ) : null;
-	$placed[ $name ] = is_array( $c ) ? $c['section'] : 'MISSING';
+$got = array();
+foreach ( $expect as $name => $_ ) {
+	$got[ $name ] = isset( $panel[ $name ] ) ? array( $panel[ $name ]['section'], $panel[ $name ]['tab'] ) : null;
 }
-t( 'the option is placed in the section where the image is chosen (Style > Background, Content > Image)', $placed === $where, wp_json_encode( $placed ) );
+t( 'the option sits where the image is chosen (Style > Background; Content > Image)', is_array( $panel ) && $got === $expect, wp_json_encode( $got ) );
+t( 'the select offers auto / always / never with a readable label', is_array( $panel ) && array( 'auto', 'always', 'never' ) === $panel['container']['options'] && '' !== $panel['container']['label'] );
+t( 'unrelated widgets (heading) do not get the option', is_array( $panel ) && null === $panel['heading'] );
 t( 'there is no separate far-away "KI-Kennzeichnung" section anymore', null === $cont->get_controls( 'kikz_section' ) );
 t( 'Elementor cache can be cleared (element cache + CSS)', KI_Kennzeichnung_Cache::clear_elementor() );
 

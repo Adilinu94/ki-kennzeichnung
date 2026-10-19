@@ -96,14 +96,17 @@ $other = Frontend::filter_content_img( '<img src="https://example.org/wp-content
 t( 'foreign image is left alone', false === strpos( $other, 'ki-flagged' ) );
 t( 'URL lookup: -scaled, size and edit suffixes normalise to one key', Flags::normalize_stem( '2025/10/photo-scaled-300x200.jpg' ) === '2025/10/photo' && Flags::normalize_stem( '2025/10/photo-e1700000000000.jpg' ) === '2025/10/photo' );
 
-section( 'Footer data for the script' );
+section( 'Badge geometry travels with the element (survives Elementor/HTML caches)' );
 ob_start();
 Frontend::footer_assets();
 ob_end_clean();
-$inline = wp_scripts()->get_data( 'kikz-frontend', 'before' );
-$inline = is_array( $inline ) ? implode( '', $inline ) : (string) $inline;
 t( 'script is enqueued when flagged images were rendered', wp_script_is( 'kikz-frontend', 'enqueued' ) );
-t( 'inline data carries badge rects keyed by file name', false !== strpos( $inline, 'kikzData' ) && false !== strpos( $inline, '"rects"' ) && false !== strpos( $inline, wp_basename( $file ) ), substr( $inline, 0, 200 ) );
+preg_match( '/data-kikz-rects="([^"]*)"/', $img_with_attr = wp_get_attachment_image( $id, 'medium' ), $mm );
+$geo = json_decode( html_entity_decode( $mm[1] ?? '' ), true );
+t( 'the <img> carries data-kikz-rects (valid JSON)', is_array( $geo ), $img_with_attr );
+t( 'it lists the main file and every size, each with its badge rectangle', is_array( $geo ) && is_array( $geo[ wp_basename( $file ) ] ?? null ) && 4 === count( $geo[ wp_basename( $file ) ] ) && count( $geo ) >= 1 + count( $meta1['sizes'] ), wp_json_encode( array_keys( (array) $geo ) ) );
+t( 'the rectangles equal the stored ones', is_array( $geo ) && $geo[ wp_basename( $file ) ] === get_post_meta( $id, '_ki_badge_rects', true )[ wp_basename( $file ) ] );
+t( 'no heavy inline data in the footer any more (only the tiny config)', false === strpos( (string) ( is_array( $i = wp_scripts()->get_data( 'kikz-frontend', 'before' ) ) ? implode( '', $i ) : $i ), 'rects' ) );
 
 section( 'CSS output & escaping' );
 update_option( 'kikz_badge_text', 'KI & "Co" </style><b>' );

@@ -23,7 +23,12 @@ Das Badge wird als absolut positioniertes `::after` des markierten Elements geze
 
 ## Caches
 
-Elementor speichert gerenderte Elemente (Element-Cache) und CSS. Beim Markieren/Entmarkieren und bei Änderungen am Badge-Stil ruft das Plugin gebündelt `files_manager->clear_cache()` auf. Elementors eigene Zuschnitte (`uploads/elementor/thumbs/`) tragen die Änderungszeit der Quelldatei im Namen und entstehen nach dem Stempeln von selbst neu.
+Elementor speichert gerenderte Elemente (Element-Cache) und CSS. Ein gecachtes Element wird **ohne** erneuten PHP-Aufruf unserer Render-Hooks ausgeliefert. Deshalb gilt:
+
+- Alles, was das Frontend-Skript braucht, steht **am Element selbst**: `data-kikz-id` und `data-kikz-rects` (Dateiname → Rechteck des eingebrannten Badges, `0` = diese Datei trägt keins). Das wird mit dem Element gecacht.
+- Das Skript wird auf jeder Seite geladen, auf der Elementor Inhalt ausgegeben hat (`has_elementor_in_page()`) und markierte Bilder existieren, nicht nur dann, wenn beim Rendern etwas aufgezeichnet wurde.
+- Beim Markieren/Entmarkieren und bei Änderungen am Badge-Stil ruft das Plugin gebündelt `files_manager->clear_cache()` auf.
+- Elementors eigene Zuschnitte (`uploads/elementor/thumbs/`) tragen die Änderungszeit der Quelldatei im Namen und entstehen nach dem Stempeln von selbst neu.
 
 ## Manuell
 
